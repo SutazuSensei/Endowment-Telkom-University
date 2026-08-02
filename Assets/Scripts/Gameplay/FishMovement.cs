@@ -208,9 +208,8 @@ public class FishMovement : MonoBehaviour
         {
             if (targetFood.IsActive)
             {
-                // Aim the mouth at the food instead of the center of the fish body
-                float facing = (targetFood.AnchoredPosition.x > basePosition.x) ? 1f : -1f;
-                targetPosition = targetFood.AnchoredPosition - new Vector2(mouthOffset.x * facing, mouthOffset.y);
+                // Always target the true food coordinates so the fish never moves in the wrong direction
+                targetPosition = targetFood.AnchoredPosition;
             }
             else
             {
@@ -234,9 +233,7 @@ public class FishMovement : MonoBehaviour
 
         targetFood = food;
         targetSpeed = moveSpeedMax;
-
-        float facing = (food.AnchoredPosition.x > basePosition.x) ? 1f : -1f;
-        targetPosition = food.AnchoredPosition - new Vector2(mouthOffset.x * facing, mouthOffset.y);
+        targetPosition = food.AnchoredPosition;
 
         // Always switch to Accelerating/Swimming so the fish actively pursues the food without slowing down
         if (state == FishState.Idle || state == FishState.Eating || state == FishState.Decelerating)
@@ -253,7 +250,10 @@ public class FishMovement : MonoBehaviour
         if (targetFood != null && targetFood.IsActive)
         {
             float mouthDistance = (GetMouthPosition() - targetFood.AnchoredPosition).magnitude;
-            if (mouthDistance <= foodArrivalThreshold)
+            float centerDistance = (basePosition - targetFood.AnchoredPosition).magnitude;
+
+            // Arrived if the mouth touches the food OR if the food dropped onto the fish's body/tail
+            if (mouthDistance <= foodArrivalThreshold || centerDistance <= (mouthOffset.x * 0.8f))
             {
                 currentSpeed = 0f;
                 ApplyPosition(basePosition);
@@ -275,7 +275,7 @@ public class FishMovement : MonoBehaviour
         // Ensure speed is at cruising level (covers transition from Accelerating)
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
 
-        // Immediate food arrival check from mouth position
+        // Immediate food arrival check from mouth or body position
         if (CheckFoodArrival()) return;
 
         Vector2 toTarget = targetPosition - basePosition;
@@ -350,7 +350,7 @@ public class FishMovement : MonoBehaviour
     {
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
 
-        // Immediate food arrival check from mouth position
+        // Immediate food arrival check from mouth or body position
         if (CheckFoodArrival()) return;
 
         Vector2 toTarget = targetPosition - basePosition;
@@ -509,12 +509,26 @@ public class FishMovement : MonoBehaviour
 
     private void UpdateFlip()
     {
-        // Decide facing direction based on horizontal offset to target
-        float horizontalDiff = targetPosition.x - basePosition.x;
-
-        if (state != FishState.Idle && state != FishState.Eating && Mathf.Abs(horizontalDiff) > flipDeadZone)
+        if (state != FishState.Idle && state != FishState.Eating)
         {
-            targetFacing = horizontalDiff > 0f ? 1f : -1f;
+            if (targetFood != null && targetFood.IsActive)
+            {
+                // When pursuing food, always face directly toward the food item
+                float foodHorizontalDiff = targetFood.AnchoredPosition.x - basePosition.x;
+                if (Mathf.Abs(foodHorizontalDiff) > flipDeadZone)
+                {
+                    targetFacing = foodHorizontalDiff > 0f ? 1f : -1f;
+                }
+            }
+            else
+            {
+                // Normal waypoint flipping
+                float horizontalDiff = targetPosition.x - basePosition.x;
+                if (Mathf.Abs(horizontalDiff) > flipDeadZone)
+                {
+                    targetFacing = horizontalDiff > 0f ? 1f : -1f;
+                }
+            }
         }
 
         // Smoothly interpolate scale.x toward the target facing
