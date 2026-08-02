@@ -571,6 +571,7 @@ GameObject:
   - component: {fileID: 227550658}
   - component: {fileID: 227550660}
   - component: {fileID: 227550659}
+  - component: {fileID: 227550661}
   m_Layer: 5
   m_Name: fih
   m_TagString: Untagged
@@ -635,6 +636,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 227550657}
   m_CullTransparentMesh: 1
+--- !u!114 &227550661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227550657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c7a7e89df041f7478c413aa9e5b7dee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FishMovement
+  moveSpeedMin: 80
+  moveSpeedMax: 180
+  acceleration: 120
+  deceleration: 150
+  arrivalThreshold: 15
+  slowDownDistance: 100
+  eatingDuration: 1.5
+  mouthOffset: {x: 105, y: 0}
+  foodArrivalThreshold: 30
+  wobbleAmplitude: 20
+  wobbleFrequency: 1.2
+  idleDurationMin: 0.5
+  idleDurationMax: 2.5
+  idleChance: 0.35
+  idleBobAmplitude: 3
+  idleBobSpeed: 1.5
+  flipSpeed: 5
+  flipDeadZone: 10
+  maxTiltAngle: 0
+  tiltSpeed: 3
+  swimArea: {fileID: 659389966}
+  boundaryPadding: 20
+  fishSize: {x: 200, y: 100}
+  applyFishSize: 1
 --- !u!1 &454957019
 GameObject:
   m_ObjectHideFlags: 0
@@ -2591,6 +2628,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1552968792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1552968794}
+  - component: {fileID: 1552968793}
+  m_Layer: 0
+  m_Name: FeedManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1552968793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552968792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34e37ad08512305409d80b391cb8ce1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FeedController
+  fishMovement: {fileID: 227550661}
+  foodPrefab: {fileID: 4426525846773731451, guid: 255adb5f0c14b2443bce3c022b0037cc, type: 3}
+  aquariumArea: {fileID: 659389966}
+  feedButton: {fileID: 1787162650}
+--- !u!4 &1552968794
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552968792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1316.0979, y: -0.00001, z: 24328.695}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1787162648
 GameObject:
   m_ObjectHideFlags: 0
@@ -3453,3 +3538,4 @@ SceneRoots:
   - {fileID: 1478725558}
   - {fileID: 1176691628}
   - {fileID: 1086824658}
+  - {fileID: 1552968794}
