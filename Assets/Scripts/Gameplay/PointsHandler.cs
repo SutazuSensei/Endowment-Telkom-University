@@ -9,7 +9,6 @@ public class PointsHandler : MonoBehaviour
     public TextMeshProUGUI pointText;
 
     [Header("Points Settings")]
-    public string prefix = "Score: ";
     public int current = 0;
 
     private void Awake()
@@ -45,7 +44,7 @@ public class PointsHandler : MonoBehaviour
     {
         if (pointText != null)
         {
-            pointText.text = $"{prefix}{current}";
+            pointText.text = $"{current}";
         }
     }
 }

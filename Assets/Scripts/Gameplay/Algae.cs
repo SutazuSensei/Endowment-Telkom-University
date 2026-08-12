@@ -8,6 +8,7 @@ public class Algae : MonoBehaviour, IPointerDownHandler
     public int rewardAmount = 10;
 
     private AlgaeSpawner spawner;
+    private bool isCleaned = false;
 
     public void Setup(AlgaeSpawner spawnerRef)
     {
@@ -16,11 +17,17 @@ public class Algae : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        CleanUp();
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            CleanUp();
+        }
     }
 
     private void CleanUp()
     {
+        if (isCleaned) return;
+        isCleaned = true;
+
         GiveReward();
 
         if (spawner != null)
