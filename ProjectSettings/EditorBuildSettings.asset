@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Obstacle.unity
     guid: c415a7cf33e478144ba127b9c4efaae5
+  - enabled: 1
+    path: Assets/Scenes/Collection.unity
+    guid: 7c37e071ccf4f9844851f4a5419dca1a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

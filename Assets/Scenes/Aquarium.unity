@@ -572,6 +572,7 @@ GameObject:
   - component: {fileID: 227550660}
   - component: {fileID: 227550659}
   - component: {fileID: 227550661}
+  - component: {fileID: 227550662}
   m_Layer: 5
   m_Name: fih
   m_TagString: Untagged
@@ -672,6 +673,32 @@ MonoBehaviour:
   boundaryPadding: 20
   fishSize: {x: 200, y: 100}
   applyFishSize: 1
+--- !u!114 &227550662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227550657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0334a85133c994a43bcf22d9f2ffb770, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FishColorApplier
+  fishImage: {fileID: 227550659}
+  accessoryOverlayImage: {fileID: 0}
+  colorVariants:
+  - colorVariant: red
+    fishSprite: {fileID: -1757439140, guid: 8faa9cb950eba0c45b2ac654d21ab364, type: 3}
+  - colorVariant: blue
+    fishSprite: {fileID: 21300000, guid: ca70e69f44380854db0970ec6d74e0d3, type: 3}
+  - colorVariant: yellow
+    fishSprite: {fileID: 21300000, guid: ea2491cde7017ce489923cfc8d61b400, type: 3}
+  - colorVariant: green
+    fishSprite: {fileID: 21300000, guid: 3a53541328782044b9c0aa461212b4e3, type: 3}
+  accessories:
+  - accessoryId: 
+    accessorySprite: {fileID: 0}
 --- !u!1 &454957019
 GameObject:
   m_ObjectHideFlags: 0
@@ -1682,7 +1709,7 @@ GameObject:
   - component: {fileID: 819864688}
   - component: {fileID: 819864687}
   m_Layer: 5
-  m_Name: Button (2)
+  m_Name: BtnStore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1752,7 +1779,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 819864688}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1086824657}
+        m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Collection
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &819864688
 MonoBehaviour:
   m_ObjectHideFlags: 0
