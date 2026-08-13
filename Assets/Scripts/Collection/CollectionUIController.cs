@@ -117,7 +117,7 @@ public class CollectionUIController : MonoBehaviour
     /// </summary>
     public void RefreshShowcase()
     {
-        FishData data = FishDataRepository.GetPlayerFish();
+        FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
 
         // Update Fish Sprite based on Color Variant
@@ -163,7 +163,7 @@ public class CollectionUIController : MonoBehaviour
     /// </summary>
     public void SelectColor(string colorVariant)
     {
-        FishDataRepository.SaveFishColor(colorVariant);
+        PlayerDataRepository.SaveFishColor(colorVariant);
         RefreshShowcase();
     }
 
@@ -174,7 +174,7 @@ public class CollectionUIController : MonoBehaviour
     /// </summary>
     public void SelectAccessory(string accessoryId)
     {
-        FishDataRepository.SaveSelectedAccessory(accessoryId);
+        PlayerDataRepository.SaveSelectedAccessory(accessoryId);
         RefreshShowcase();
     }
 
@@ -183,7 +183,7 @@ public class CollectionUIController : MonoBehaviour
     /// </summary>
     public void UnequipAccessory()
     {
-        FishDataRepository.SaveSelectedAccessory(null);
+        PlayerDataRepository.SaveSelectedAccessory(null);
         RefreshShowcase();
     }
 
