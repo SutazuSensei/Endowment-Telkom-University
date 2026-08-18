@@ -9,6 +9,11 @@ public class PointsHandler : MonoBehaviour
     public TextMeshProUGUI pointText;
 
     [Header("Points Settings")]
+    public string prefix = "Score: ";
+
+    /// <summary>
+    /// Cached points value. Always kept in sync with PlayerDataRepository.
+    /// </summary>
     public int current = 0;
 
     private void Awake()
@@ -25,13 +30,19 @@ public class PointsHandler : MonoBehaviour
 
     private void Start()
     {
+        // Load points from persistent repository
+        current = PlayerDataRepository.GetPoints();
         UpdateUI();
     }
 
     // add points
     public void AddPoints(int amount)
     {
-        current += amount;
+        // Persist to repository (saves to PlayerPrefs)
+        PlayerDataRepository.AddPoints(amount);
+
+        // Sync cached value
+        current = PlayerDataRepository.GetPoints();
         UpdateUI();
     }
 
@@ -44,7 +55,7 @@ public class PointsHandler : MonoBehaviour
     {
         if (pointText != null)
         {
-            pointText.text = $"{current}";
+            pointText.text = $"{prefix}{current}";
         }
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Applies the customized fish color variant and equipped accessory from FishDataRepository
+/// Applies the customized fish color variant and equipped accessory from PlayerDataRepository
 /// to the fish GameObject in the Personal Aquarium scene (Aquarium.unity).
 ///
 /// Attach this script to the fish GameObject ('fih') in the Personal Aquarium.
@@ -64,7 +64,7 @@ public class FishColorApplier : MonoBehaviour
     /// </summary>
     public void ApplyCustomization()
     {
-        FishData data = FishDataRepository.GetPlayerFish();
+        FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
 
         // Apply Color Variant Sprite
