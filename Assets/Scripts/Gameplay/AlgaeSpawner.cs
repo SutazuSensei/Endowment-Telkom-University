@@ -33,6 +33,8 @@ public class AlgaeSpawner : MonoBehaviour
         {
             yield return new WaitForSeconds(currentSpawnInterval);
 
+            CleanUpNullElements();
+
             // check algae count
             if (activeAlgaeList.Count < maxAlgaeOnScreen)
             {
@@ -77,5 +79,10 @@ public class AlgaeSpawner : MonoBehaviour
         {
             activeAlgaeList.Remove(algaeObj);
         }
+    }
+
+    private void CleanUpNullElements()
+    {
+        activeAlgaeList.RemoveAll(item => item == null);
     }
 }
