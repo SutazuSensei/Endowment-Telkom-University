@@ -10,9 +10,8 @@ public class AlgaeSpawner : MonoBehaviour
     public RectTransform spawnArea;
 
     [Header("Spawn Rate Settings")]
-    public float InitialSpawnInterval = 4f;
-    public float minSpawnInterval = 1f;
-    public float difficultyRamp = 0.1f;
+    public float minSpawnInterval = 10f;
+    public float maxSpawnInterval = 15f;
 
     [Header("Max Constraint")]
     public int maxAlgaeOnScreen = 15;
@@ -23,7 +22,6 @@ public class AlgaeSpawner : MonoBehaviour
 
     void Start()
     {
-        currentSpawnInterval = InitialSpawnInterval;
         StartCoroutine(SpawnRoutine());
     }
 
@@ -31,7 +29,8 @@ public class AlgaeSpawner : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(currentSpawnInterval);
+            float randomInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+            yield return new WaitForSeconds(randomInterval);
 
             CleanUpNullElements();
 
@@ -47,19 +46,19 @@ public class AlgaeSpawner : MonoBehaviour
     {
         if (algaePrefab == null || spawnArea == null) return;
 
-        // prefab alage dibawah parent
+        // prefab algae dibawah parent spawnArea
         GameObject newAlgae = Instantiate(algaePrefab, spawnArea);
         newAlgae.transform.SetAsLastSibling();
 
-        // hitung posisi acak dibatas RectTransform spawnArea
+        // hitung posisi acak di sumbu X, tapi sumbu Y dikunci di dasar Aquarium
         Rect rect = spawnArea.rect;
         float randomX = Random.Range(rect.xMin + 50f, rect.xMax - 50f);
-        float randomY = Random.Range(rect.yMin + 50f, rect.yMax - 50f);
+        float fixedY = rect.yMin + 50f; // Dasar aquarium ditambah padding agar tidak terpotong
 
         RectTransform algaeRect = newAlgae.GetComponent<RectTransform>();
         if (algaeRect != null )
         {
-            algaeRect.anchoredPosition = new Vector2(randomX, randomY);
+            algaeRect.anchoredPosition = new Vector2(randomX, fixedY);
         }
 
         // referensi spawner ke script Algae

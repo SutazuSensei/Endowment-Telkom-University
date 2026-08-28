@@ -94,6 +94,12 @@ public class FeedController : MonoBehaviour
 
         // Notify fish movement to override its target toward the food
         fishMovement.SetFoodTarget(food);
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayFoodDrop();
+        }
+
         Debug.Log("[FeedController] Food spawned and fish notified.");
     }
 }

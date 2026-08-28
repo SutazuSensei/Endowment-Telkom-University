@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 37197477}
   - component: {fileID: 37197476}
   - component: {fileID: 37197478}
+  - component: {fileID: 37197479}
   m_Layer: 5
   m_Name: Kacamata
   m_TagString: Untagged
@@ -239,6 +240,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &37197479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 37197474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &66187821
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,6 +776,7 @@ GameObject:
   - component: {fileID: 585917895}
   - component: {fileID: 585917894}
   - component: {fileID: 585917896}
+  - component: {fileID: 585917897}
   m_Layer: 5
   m_Name: Kalung
   m_TagString: Untagged
@@ -871,6 +885,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &585917897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585917892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &655817447
 GameObject:
   m_ObjectHideFlags: 0
@@ -959,6 +985,7 @@ GameObject:
   - component: {fileID: 732957047}
   - component: {fileID: 732957046}
   - component: {fileID: 732957045}
+  - component: {fileID: 732957049}
   m_Layer: 5
   m_Name: No
   m_TagString: Untagged
@@ -1068,6 +1095,18 @@ RectTransform:
   m_AnchoredPosition: {x: 96, y: -169}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &732957049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732957044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &758340971
 GameObject:
   m_ObjectHideFlags: 0
@@ -1262,6 +1301,7 @@ GameObject:
   - component: {fileID: 909588602}
   - component: {fileID: 909588601}
   - component: {fileID: 909588603}
+  - component: {fileID: 909588604}
   m_Layer: 5
   m_Name: Yes
   m_TagString: Untagged
@@ -1371,6 +1411,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &909588604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 909588599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1023939054
 GameObject:
   m_ObjectHideFlags: 0
@@ -1866,6 +1918,7 @@ GameObject:
   - component: {fileID: 1252000251}
   - component: {fileID: 1252000250}
   - component: {fileID: 1252000249}
+  - component: {fileID: 1252000252}
   m_Layer: 5
   m_Name: Terpopuler
   m_TagString: Untagged
@@ -1974,6 +2027,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252000247}
   m_CullTransparentMesh: 1
+--- !u!114 &1252000252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252000247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1264857134
 GameObject:
   m_ObjectHideFlags: 0
@@ -2123,6 +2188,7 @@ GameObject:
   - component: {fileID: 1272299337}
   - component: {fileID: 1272299336}
   - component: {fileID: 1272299338}
+  - component: {fileID: 1272299339}
   m_Layer: 5
   m_Name: BtnClose
   m_TagString: Untagged
@@ -2231,6 +2297,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1272299339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272299334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1367653170
 GameObject:
   m_ObjectHideFlags: 0
@@ -2243,6 +2321,7 @@ GameObject:
   - component: {fileID: 1367653173}
   - component: {fileID: 1367653172}
   - component: {fileID: 1367653174}
+  - component: {fileID: 1367653175}
   m_Layer: 5
   m_Name: Lainnya
   m_TagString: Untagged
@@ -2351,6 +2430,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1367653175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367653170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1399503618
 GameObject:
   m_ObjectHideFlags: 0
@@ -2626,6 +2717,7 @@ GameObject:
   - component: {fileID: 1447368579}
   - component: {fileID: 1447368578}
   - component: {fileID: 1447368580}
+  - component: {fileID: 1447368581}
   m_Layer: 5
   m_Name: Topi
   m_TagString: Untagged
@@ -2734,6 +2826,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1447368581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447368576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1487335489
 GameObject:
   m_ObjectHideFlags: 0
@@ -2785,6 +2889,7 @@ GameObject:
   - component: {fileID: 1539418217}
   - component: {fileID: 1539418216}
   - component: {fileID: 1539418215}
+  - component: {fileID: 1539418218}
   m_Layer: 5
   m_Name: Terbaru
   m_TagString: Untagged
@@ -2893,6 +2998,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1539418213}
   m_CullTransparentMesh: 1
+--- !u!114 &1539418218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1539418213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1564670444
 GameObject:
   m_ObjectHideFlags: 0
@@ -2905,6 +3022,7 @@ GameObject:
   - component: {fileID: 1564670447}
   - component: {fileID: 1564670446}
   - component: {fileID: 1564670448}
+  - component: {fileID: 1564670449}
   m_Layer: 5
   m_Name: Semua
   m_TagString: Untagged
@@ -3013,6 +3131,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1564670449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564670444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1586307035
 GameObject:
   m_ObjectHideFlags: 0
@@ -3283,6 +3413,7 @@ GameObject:
   - component: {fileID: 1896142199}
   - component: {fileID: 1896142198}
   - component: {fileID: 1896142200}
+  - component: {fileID: 1896142201}
   m_Layer: 5
   m_Name: Dasi
   m_TagString: Untagged
@@ -3391,6 +3522,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1896142201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896142196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1966496244
 GameObject:
   m_ObjectHideFlags: 0
@@ -3403,6 +3546,7 @@ GameObject:
   - component: {fileID: 1966496248}
   - component: {fileID: 1966496247}
   - component: {fileID: 1966496246}
+  - component: {fileID: 1966496249}
   m_Layer: 5
   m_Name: Semua
   m_TagString: Untagged
@@ -3511,6 +3655,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1966496244}
   m_CullTransparentMesh: 1
+--- !u!114 &1966496249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1966496244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a439ba0b8776d40abe354ed1e94e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
 --- !u!1 &1969047255
 GameObject:
   m_ObjectHideFlags: 0

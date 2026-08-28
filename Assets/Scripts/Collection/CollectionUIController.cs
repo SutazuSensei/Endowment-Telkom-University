@@ -23,11 +23,24 @@ public class CollectionUIController : MonoBehaviour
         [Tooltip("Unique color variant ID (e.g. 'red', 'blue', 'yellow', 'green').")]
         public string colorVariant;
 
-        [Tooltip("The fish sprite corresponding to this color variant.")]
-        public Sprite fishSprite;
-
         [Tooltip("UI Button in the palette to select this color.")]
         public Button paletteButton;
+    }
+
+    [System.Serializable]
+    public struct TierColorSprite
+    {
+        [Tooltip("The fish tier (e.g. 'Common', 'Rare', 'Epic', 'Legendary').")]
+        public string tier;
+
+        [Tooltip("Unique color variant ID (e.g. 'red', 'blue', 'yellow', 'green').")]
+        public string colorVariant;
+
+        [Tooltip("The fish sprite corresponding to this tier and color.")]
+        public Sprite fishSprite;
+
+        [Tooltip("Custom size in pixels for this specific tier and color variant. Ignored if 0,0.")]
+        public Vector2 customSize;
     }
 
     [System.Serializable]
@@ -57,8 +70,12 @@ public class CollectionUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI fishInfoText;
 
     [Header("Color Palette Configuration")]
-    [Tooltip("List of available color variants and their matching sprites/buttons.")]
+    [Tooltip("List of UI buttons for selecting color variants.")]
     [SerializeField] private ColorPaletteItem[] colorPalette;
+
+    [Header("Fish Sprites")]
+    [Tooltip("List of fish sprites combinations (Tier + Color Variant) for the Showcase.")]
+    [SerializeField] private TierColorSprite[] fishSprites;
 
     [Header("Accessory Configuration")]
     [Tooltip("List of available accessories and their matching sprites/buttons.")]
@@ -120,11 +137,18 @@ public class CollectionUIController : MonoBehaviour
         FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
 
-        // Update Fish Sprite based on Color Variant
-        Sprite variantSprite = GetSpriteForColorVariant(data.colorVariant);
-        if (fishShowcaseImage != null && variantSprite != null)
+        // Update Fish Sprite based on Tier + Color Variant
+        if (TryGetConfigForFish(data.tier, data.colorVariant, out TierColorSprite config))
         {
-            fishShowcaseImage.sprite = variantSprite;
+            if (fishShowcaseImage != null && config.fishSprite != null)
+            {
+                fishShowcaseImage.sprite = config.fishSprite;
+            }
+
+            if (fishShowcaseImage != null && config.customSize != Vector2.zero)
+            {
+                fishShowcaseImage.rectTransform.sizeDelta = config.customSize;
+            }
         }
 
         // Update Accessory Overlay
@@ -200,17 +224,33 @@ public class CollectionUIController : MonoBehaviour
 
     // ───────────────────────────── Helper Lookups ─────────────────────────────
 
-    private Sprite GetSpriteForColorVariant(string variant)
+    private bool TryGetConfigForFish(string tier, string variant, out TierColorSprite result)
     {
-        if (colorPalette == null) return null;
-        foreach (var item in colorPalette)
+        result = default;
+        if (fishSprites == null) return false;
+        
+        bool foundFallback = false;
+
+        foreach (var item in fishSprites)
         {
-            if (string.Equals(item.colorVariant, variant, System.StringComparison.OrdinalIgnoreCase))
+            bool matchTier = string.Equals(item.tier, tier, System.StringComparison.OrdinalIgnoreCase);
+            bool matchColor = string.Equals(item.colorVariant, variant, System.StringComparison.OrdinalIgnoreCase);
+
+            if (matchTier && matchColor)
             {
-                return item.fishSprite;
+                result = item;
+                return true; // Perfect match
+            }
+            
+            // Fallback to any sprite of the same color if tier combo doesn't exist
+            if (matchColor && !foundFallback)
+            {
+                result = item;
+                foundFallback = true;
             }
         }
-        return null;
+        
+        return foundFallback;
     }
 
     private Sprite GetSpriteForAccessory(string accessoryId)

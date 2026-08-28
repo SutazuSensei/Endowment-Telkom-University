@@ -5,10 +5,17 @@ using UnityEngine;
 // Data Models
 
 [Serializable]
+public class BigAquariumFishData
+{
+    public string tier;
+    public string colorVariant;
+}
+
+[Serializable]
 public class PlayerFishData
 {
     public string name;
-    public List<string> fish;
+    public List<BigAquariumFishData> fish;
 }
 
 [Serializable]
@@ -33,15 +40,15 @@ public class BigAquariumManager : MonoBehaviour
     public string dummyJson = @"[
   {
     ""name"":""Andi"",
-    ""fish"":[""Common""]
+    ""fish"":[{""tier"":""Common"", ""colorVariant"":""red""}]
   },
   {
     ""name"":""Siti"",
-    ""fish"":[""Common""]
+    ""fish"":[{""tier"":""Common"", ""colorVariant"":""blue""}]
   },
   {
     ""name"":""Budi"",
-    ""fish"":[""Epic""]
+    ""fish"":[{""tier"":""Epic"", ""colorVariant"":""green""}]
   }
 ]";
 
@@ -84,6 +91,7 @@ public class BigAquariumManager : MonoBehaviour
     {
         string[] sampleNames = { "Rudi", "Eka", "Dewi", "Fajar", "Gita", "Hana", "Irfan", "Joko", "Kiki", "Lani", "Maya", "Nico", "Rian", "Sari" };
         string[] sampleRarities = { "Common", "Rare", "Epic", "Legendary" };
+        string[] sampleColors = { "red", "blue", "green", "yellow" };
 
         // Hitung total ikan saat ini
         int currentFishCount = 0;
@@ -99,11 +107,12 @@ public class BigAquariumManager : MonoBehaviour
         {
             string randomName = sampleNames[index % sampleNames.Length];
             string randomRarity = sampleRarities[UnityEngine.Random.Range(0, sampleRarities.Length)];
+            string randomColor = sampleColors[UnityEngine.Random.Range(0, sampleColors.Length)];
 
             list.Add(new PlayerFishData
             {
                 name = randomName,
-                fish = new List<string> { randomRarity }
+                fish = new List<BigAquariumFishData> { new BigAquariumFishData { tier = randomRarity, colorVariant = randomColor } }
             });
 
             currentFishCount++;
@@ -129,7 +138,7 @@ public class BigAquariumManager : MonoBehaviour
         {
             if (player.fish == null) continue;
 
-            foreach (string fishRarity in player.fish)
+            foreach (BigAquariumFishData fishData in player.fish)
             {
                 // 1. Instantiate Prefab Ikan sebagai child dari aquariumArea
                 GameObject newFish = Instantiate(fishPrefab, aquariumArea);
@@ -149,11 +158,11 @@ public class BigAquariumManager : MonoBehaviour
                     fishRect.localPosition = new Vector3(fishRect.localPosition.x, fishRect.localPosition.y, 0f);
                 }
 
-                // 2. Pass data Nama Pemilik & Rarity ke script AquariumFish
+                // 2. Pass data Nama Pemilik, Tier & Color ke script AquariumFish
                 AquariumFish fishScript = newFish.GetComponent<AquariumFish>();
                 if (fishScript != null)
                 {
-                    fishScript.SetupFish(player.name, fishRarity);
+                    fishScript.SetupFish(player.name, fishData.tier, fishData.colorVariant);
                 }
 
                 totalSpawned++;

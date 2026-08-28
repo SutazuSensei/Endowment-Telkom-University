@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 726, y: -363}
-  m_SizeDelta: {x: 340.5143, y: 253.3279}
+  m_SizeDelta: {x: 206.6, y: 149.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8928878362846824863
 CanvasRenderer:
@@ -68,7 +68,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f1519183f0b5f6c44ae657bcc787a5c1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ad3d37f6d56e07e44af8eb1a2351aeb1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -112,7 +112,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.29930115, y: -0.10964966}
+  m_Offset: {x: 0.05883789, y: 6.003559}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -122,7 +122,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 339.1843, y: 252.61285}
+  m_Size: {x: 204.03638, y: 134.77057}
   m_EdgeRadius: 0
 --- !u!212 &4925387826851126362
 SpriteRenderer:
@@ -195,4 +195,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 772c6734576337b4c9b483aea4e9526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Algae
-  rewardAmount: 10
+  minReward: 100
+  maxReward: 200

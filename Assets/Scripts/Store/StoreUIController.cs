@@ -345,6 +345,10 @@ public class StoreUIController : MonoBehaviour
         switch (result)
         {
             case PurchaseResult.Success:
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlayPurchaseSuccess();
+                }
                 ShowFeedback("Berhasil dibeli!");
                 RefreshUI();
                 break;
