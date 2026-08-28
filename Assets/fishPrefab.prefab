@@ -243,6 +243,7 @@ MonoBehaviour:
   idleChance: 0.35
   idleBobAmplitude: 3
   idleBobSpeed: 1.5
+  invertSpriteFacing: 1
   flipSpeed: 5
   flipDeadZone: 10
   maxTiltAngle: 0
@@ -250,7 +251,7 @@ MonoBehaviour:
   swimArea: {fileID: 0}
   boundaryPadding: 20
   fishSize: {x: 250, y: 134}
-  applyFishSize: 1
+  applyFishSize: 0
 --- !u!114 &5114904281955841927
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -266,19 +267,83 @@ MonoBehaviour:
   fishImage: {fileID: 3124053360694943840}
   ownerNameText: {fileID: 482952457923085582}
   rarityConfigs:
-  - rarityName: Legendary
-    fishSprite: {fileID: 21300000, guid: ea2491cde7017ce489923cfc8d61b400, type: 3}
-    customSize: {x: 0, y: 0}
-    textColor: {r: 1, g: 0.8562341, b: 0, a: 1}
-  - rarityName: Epic
-    fishSprite: {fileID: 21300000, guid: 3a53541328782044b9c0aa461212b4e3, type: 3}
-    customSize: {x: 0, y: 0}
-    textColor: {r: 1, g: 0, b: 0.8907285, a: 1}
-  - rarityName: Rare
-    fishSprite: {fileID: 21300000, guid: ca70e69f44380854db0970ec6d74e0d3, type: 3}
-    customSize: {x: 0, y: 0}
-    textColor: {r: 0, g: 0.54454947, b: 1, a: 1}
   - rarityName: Common
-    fishSprite: {fileID: -1757439140, guid: 8faa9cb950eba0c45b2ac654d21ab364, type: 3}
-    customSize: {x: 0, y: 0}
-    textColor: {r: 0.5409272, g: 1, b: 0, a: 1}
+    colorVariant: red
+    fishSprite: {fileID: 21300000, guid: 62fe8f99886b5254094d33b746af28a2, type: 3}
+    customSize: {x: 200, y: 100}
+    textColor: {r: 1, g: 1, b: 1, a: 1}
+  - rarityName: Common
+    colorVariant: blue
+    fishSprite: {fileID: 21300000, guid: 071a1a9b07b20974fa09c36dcbd5f01a, type: 3}
+    customSize: {x: 200, y: 100}
+    textColor: {r: 1, g: 1, b: 1, a: 1}
+  - rarityName: Common
+    colorVariant: green
+    fishSprite: {fileID: 21300000, guid: c2b985679bbec1b4d9c85e21cce2beae, type: 3}
+    customSize: {x: 200, y: 100}
+    textColor: {r: 1, g: 1, b: 1, a: 1}
+  - rarityName: Common
+    colorVariant: yellow
+    fishSprite: {fileID: 21300000, guid: c690065146727ed488c424990af658e3, type: 3}
+    customSize: {x: 200, y: 100}
+    textColor: {r: 1, g: 1, b: 1, a: 1}
+  - rarityName: Rare
+    colorVariant: red
+    fishSprite: {fileID: 21300000, guid: 69f763a847cf88a4a853443990b75098, type: 3}
+    customSize: {x: 250, y: 125}
+    textColor: {r: 0, g: 1, b: 1, a: 1}
+  - rarityName: Rare
+    colorVariant: blue
+    fishSprite: {fileID: 21300000, guid: 95d64760e1c8a9c49a916f69c56b4097, type: 3}
+    customSize: {x: 250, y: 125}
+    textColor: {r: 0, g: 1, b: 1, a: 1}
+  - rarityName: Rare
+    colorVariant: green
+    fishSprite: {fileID: 21300000, guid: 7839aab58f85191439d197342c548ddd, type: 3}
+    customSize: {x: 250, y: 125}
+    textColor: {r: 0, g: 1, b: 1, a: 1}
+  - rarityName: Rare
+    colorVariant: yellow
+    fishSprite: {fileID: 21300000, guid: eb900da40e66461459d6743430485603, type: 3}
+    customSize: {x: 250, y: 125}
+    textColor: {r: 0, g: 1, b: 1, a: 1}
+  - rarityName: Epic
+    colorVariant: red
+    fishSprite: {fileID: 21300000, guid: b0264386691976248bc5c55caa522b9e, type: 3}
+    customSize: {x: 300, y: 150}
+    textColor: {r: 1, g: 0, b: 1, a: 1}
+  - rarityName: Epic
+    colorVariant: blue
+    fishSprite: {fileID: 21300000, guid: aeff418993d8d10488af8de25cef58c5, type: 3}
+    customSize: {x: 300, y: 150}
+    textColor: {r: 1, g: 0, b: 1, a: 1}
+  - rarityName: Epic
+    colorVariant: green
+    fishSprite: {fileID: 21300000, guid: 89f33f06118045147b60329b7e8de6f5, type: 3}
+    customSize: {x: 300, y: 150}
+    textColor: {r: 1, g: 0, b: 1, a: 1}
+  - rarityName: Epic
+    colorVariant: yellow
+    fishSprite: {fileID: 21300000, guid: c37d4399cbeeb844fa1a41f93b0a8349, type: 3}
+    customSize: {x: 300, y: 150}
+    textColor: {r: 1, g: 0, b: 1, a: 1}
+  - rarityName: Legendary
+    colorVariant: red
+    fishSprite: {fileID: 21300000, guid: e1f2195543ed99e4d86de199002917cc, type: 3}
+    customSize: {x: 400, y: 200}
+    textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - rarityName: Legendary
+    colorVariant: blue
+    fishSprite: {fileID: 21300000, guid: f40c5a60fddd1e347bccb94f7ac85399, type: 3}
+    customSize: {x: 400, y: 200}
+    textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - rarityName: Legendary
+    colorVariant: green
+    fishSprite: {fileID: 21300000, guid: 323dd8a67a571fa4fb69857dbec4d138, type: 3}
+    customSize: {x: 400, y: 200}
+    textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - rarityName: Legendary
+    colorVariant: yellow
+    fishSprite: {fileID: 21300000, guid: bc272399e66d5ea4cb8f658427de0530, type: 3}
+    customSize: {x: 400, y: 200}
+    textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

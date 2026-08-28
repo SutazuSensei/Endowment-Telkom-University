@@ -223,6 +223,22 @@ public static class PlayerDataRepository
         Save();
     }
 
+    /// <summary>
+    /// Simulates a donation resulting in a new fish of the specified tier.
+    /// Replaces the current fish for LoFi testing purposes.
+    /// Future: POST /api/v1/donations -> Wait for webhook -> GET /api/v1/me/fish
+    /// </summary>
+    public static void SimulateDonation(string tier)
+    {
+        EnsureInitialized();
+        playerFish.tier = tier;
+        
+        // Optionally reset accessory or let it persist
+        // playerFish.selectedAccessoryId = null;
+
+        Save();
+    }
+
     // ───────────────────────────── Accessory Queries ─────────────────────────────
 
     /// <summary>

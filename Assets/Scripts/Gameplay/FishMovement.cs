@@ -78,6 +78,9 @@ public class FishMovement : MonoBehaviour
     [SerializeField] private float idleBobSpeed = 1.5f;
 
     [Header("Turning")]
+    [Tooltip("Check this if the original sprite asset is drawn facing left instead of right.")]
+    [SerializeField] private bool invertSpriteFacing = false;
+
     [Tooltip("How fast the fish smoothly flips horizontally (higher = snappier).")]
     [SerializeField] private float flipSpeed = 5f;
 
@@ -146,7 +149,8 @@ public class FishMovement : MonoBehaviour
         }
 
         perlinSeed = Random.Range(0f, 1000f);
-        targetFacing = fishRect.localScale.x >= 0f ? 1f : -1f;
+        float initialFacing = fishRect.localScale.x >= 0f ? 1f : -1f;
+        targetFacing = invertSpriteFacing ? -initialFacing : initialFacing;
     }
 
     private void Start()
@@ -517,7 +521,8 @@ public class FishMovement : MonoBehaviour
                 float foodHorizontalDiff = targetFood.AnchoredPosition.x - basePosition.x;
                 if (Mathf.Abs(foodHorizontalDiff) > flipDeadZone)
                 {
-                    targetFacing = foodHorizontalDiff > 0f ? 1f : -1f;
+                    float rawFacing = foodHorizontalDiff > 0f ? 1f : -1f;
+                    targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
                 }
             }
             else
@@ -526,7 +531,8 @@ public class FishMovement : MonoBehaviour
                 float horizontalDiff = targetPosition.x - basePosition.x;
                 if (Mathf.Abs(horizontalDiff) > flipDeadZone)
                 {
-                    targetFacing = horizontalDiff > 0f ? 1f : -1f;
+                    float rawFacing = horizontalDiff > 0f ? 1f : -1f;
+                    targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
                 }
             }
         }

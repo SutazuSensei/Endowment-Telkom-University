@@ -10,6 +10,7 @@ public class AquariumFish : MonoBehaviour
     public struct FishRarityConfig
     {
         public string rarityName;
+        public string colorVariant;
         public Sprite fishSprite;
         public Vector2 customSize;
         public Color textColor;
@@ -37,7 +38,7 @@ public class AquariumFish : MonoBehaviour
         }
     }
 
-    public void SetupFish(string ownerName, string fishRarity)
+    public void SetupFish(string ownerName, string fishRarity, string colorVariant = "")
     {
         movementScript = GetComponent<FishMovement>();
 
@@ -48,37 +49,51 @@ public class AquariumFish : MonoBehaviour
         }
 
         // 2. Apply Custom Sprite & Size based on Rarity Configs
-        ApplyRarityConfig(fishRarity);
+        ApplyRarityConfig(fishRarity, colorVariant);
     }
 
-    private void ApplyRarityConfig(string rarity)
+    private void ApplyRarityConfig(string rarity, string colorVariant)
     {
+        bool foundFallback = false;
+
         foreach (var config in rarityConfigs)
         {
-            // Case-insensitive comparison
-            if (config.rarityName.Equals(rarity, System.StringComparison.OrdinalIgnoreCase))
+            bool matchRarity = string.Equals(config.rarityName, rarity, System.StringComparison.OrdinalIgnoreCase);
+            bool matchColor = string.IsNullOrEmpty(colorVariant) || string.Equals(config.colorVariant, colorVariant, System.StringComparison.OrdinalIgnoreCase);
+
+            if (matchRarity && matchColor)
             {
-                // Set Sprite
-                if (fishImage != null && config.fishSprite != null)
-                {
-                    fishImage.sprite = config.fishSprite;
-                }
-
-                // Set Custom Size
-                RectTransform rect = GetComponent<RectTransform>();
-                if (rect != null && config.customSize != Vector2.zero)
-                {
-                    rect.sizeDelta = config.customSize;
-                }
-
-                // Optional: Custom Text Color
-                if (ownerNameText != null && config.textColor != Color.clear)
-                {
-                    ownerNameText.color = config.textColor;
-                }
-
-                return; // Found match
+                ApplyConfig(config);
+                return; // Perfect match
             }
+
+            if (matchRarity && !foundFallback)
+            {
+                ApplyConfig(config);
+                foundFallback = true;
+            }
+        }
+    }
+
+    private void ApplyConfig(FishRarityConfig config)
+    {
+        // Set Sprite
+        if (fishImage != null && config.fishSprite != null)
+        {
+            fishImage.sprite = config.fishSprite;
+        }
+
+        // Set Custom Size
+        RectTransform rect = GetComponent<RectTransform>();
+        if (rect != null && config.customSize != Vector2.zero)
+        {
+            rect.sizeDelta = config.customSize;
+        }
+
+        // Optional: Custom Text Color
+        if (ownerNameText != null && config.textColor != Color.clear)
+        {
+            ownerNameText.color = config.textColor;
         }
     }
 }

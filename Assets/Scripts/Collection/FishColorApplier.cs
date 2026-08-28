@@ -12,13 +12,19 @@ using UnityEngine.UI;
 public class FishColorApplier : MonoBehaviour
 {
     [System.Serializable]
-    public struct ColorVariantSprite
+    public struct TierColorSprite
     {
-        [Tooltip("Unique color variant ID matching CollectionUIController (e.g. 'red', 'blue', 'yellow', 'green').")]
+        [Tooltip("The fish tier (e.g. 'Common', 'Rare', 'Epic', 'Legendary').")]
+        public string tier;
+
+        [Tooltip("Unique color variant ID (e.g. 'red', 'blue', 'yellow', 'green').")]
         public string colorVariant;
 
-        [Tooltip("The fish sprite for this color variant.")]
+        [Tooltip("The fish sprite corresponding to this tier and color.")]
         public Sprite fishSprite;
+
+        [Tooltip("Custom size in pixels for this specific tier and color variant. Ignored if 0,0.")]
+        public Vector2 customSize;
     }
 
     [System.Serializable]
@@ -39,8 +45,8 @@ public class FishColorApplier : MonoBehaviour
     [SerializeField] private Image accessoryOverlayImage;
 
     [Header("Color Variants")]
-    [Tooltip("List of color variants and their matching sprites for the Personal Aquarium.")]
-    [SerializeField] private ColorVariantSprite[] colorVariants;
+    [Tooltip("List of fish sprites combinations (Tier + Color Variant) for the Personal Aquarium.")]
+    [SerializeField] private TierColorSprite[] fishSprites;
 
     [Header("Accessories")]
     [Tooltip("List of accessories and their matching sprites for the Personal Aquarium.")]
@@ -67,13 +73,16 @@ public class FishColorApplier : MonoBehaviour
         FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
 
-        // Apply Color Variant Sprite
-        if (fishImage != null && colorVariants != null)
+        // Apply Fish Sprite based on Tier + Color Variant
+        if (fishImage != null && fishSprites != null)
         {
-            Sprite matchedSprite = GetSpriteForColorVariant(data.colorVariant);
-            if (matchedSprite != null)
+            if (TryGetConfigForFish(data.tier, data.colorVariant, out TierColorSprite config))
             {
-                fishImage.sprite = matchedSprite;
+                if (config.fishSprite != null)
+                    fishImage.sprite = config.fishSprite;
+
+                if (config.customSize != Vector2.zero)
+                    fishImage.rectTransform.sizeDelta = config.customSize;
             }
         }
 
@@ -100,17 +109,33 @@ public class FishColorApplier : MonoBehaviour
         }
     }
 
-    private Sprite GetSpriteForColorVariant(string variant)
+    private bool TryGetConfigForFish(string tier, string variant, out TierColorSprite result)
     {
-        if (colorVariants == null) return null;
-        foreach (var item in colorVariants)
+        result = default;
+        if (fishSprites == null) return false;
+        
+        bool foundFallback = false;
+
+        foreach (var item in fishSprites)
         {
-            if (string.Equals(item.colorVariant, variant, System.StringComparison.OrdinalIgnoreCase))
+            bool matchTier = string.Equals(item.tier, tier, System.StringComparison.OrdinalIgnoreCase);
+            bool matchColor = string.Equals(item.colorVariant, variant, System.StringComparison.OrdinalIgnoreCase);
+
+            if (matchTier && matchColor)
             {
-                return item.fishSprite;
+                result = item;
+                return true; // Perfect match
+            }
+            
+            // Store a fallback of the correct color just in case the specific tier+color combo doesn't exist
+            if (matchColor && !foundFallback)
+            {
+                result = item;
+                foundFallback = true;
             }
         }
-        return null;
+
+        return foundFallback;
     }
 
     private Sprite GetSpriteForAccessory(string accessoryId)
