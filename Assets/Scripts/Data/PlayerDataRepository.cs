@@ -28,7 +28,7 @@ public enum PurchaseResult
 public static class PlayerDataRepository
 {
     private const string SAVE_KEY = "player_save_data";
-    private const int DEFAULT_STARTING_POINTS = 40000;
+    private const int DEFAULT_STARTING_POINTS = 100000;
 
     private static bool initialized = false;
 
@@ -73,28 +73,16 @@ public static class PlayerDataRepository
     {
         accessoryCatalog = new List<AccessoryData>
         {
-            // ── Topi (3) ──
-            new AccessoryData { accessoryId = "hat_party",    displayName = "Topi Pesta",      price = 5000,  category = "topi",  isOwned = false },
-            new AccessoryData { accessoryId = "hat_wizard",   displayName = "Topi Penyihir",   price = 12000, category = "topi",  isOwned = false },
-            new AccessoryData { accessoryId = "hat_crown",    displayName = "Mahkota Emas",    price = 35000, category = "topi",  isOwned = false },
+            // ── Hat (4) ──
+            new AccessoryData { accessoryId = "hat_bigtop",  displayName = "Big Top Hat",    price = 10000, category = "topi", isOwned = false },
+            new AccessoryData { accessoryId = "hat_cowboy",  displayName = "Cowboy Honour",   price = 8000,  category = "topi", isOwned = false },
+            new AccessoryData { accessoryId = "hat_sailor",  displayName = "Sailor Hat",      price = 7000,  category = "topi", isOwned = false },
+            new AccessoryData { accessoryId = "hat_unicorn", displayName = "Unicorn Hat",     price = 15000, category = "topi", isOwned = false },
 
-            // ── Kalung (2) ──
-            new AccessoryData { accessoryId = "necklace_pearl", displayName = "Kalung Mutiara", price = 8000,  category = "kalung", isOwned = false },
-            new AccessoryData { accessoryId = "necklace_shell", displayName = "Kalung Kerang",  price = 15000, category = "kalung", isOwned = false },
-
-            // ── Kacamata (3) ──
-            new AccessoryData { accessoryId = "glasses_cool",  displayName = "Kacamata Hitam",   price = 6000,  category = "kacamata", isOwned = false },
-            new AccessoryData { accessoryId = "glasses_round", displayName = "Kacamata Bulat",   price = 7000,  category = "kacamata", isOwned = false },
-            new AccessoryData { accessoryId = "glasses_star",  displayName = "Kacamata Bintang", price = 10000, category = "kacamata", isOwned = false },
-
-            // ── Dasi (2) ──
-            new AccessoryData { accessoryId = "tie_bow",   displayName = "Dasi Kupu-kupu", price = 5000, category = "dasi", isOwned = false },
-            new AccessoryData { accessoryId = "tie_polka", displayName = "Dasi Polkadot",  price = 8000, category = "dasi", isOwned = false },
-
-            // ── Aksesoris Lain (3) ──
-            new AccessoryData { accessoryId = "acc_scarf",  displayName = "Syal Rajut",    price = 9000, category = "aksesoris_lain", isOwned = false },
-            new AccessoryData { accessoryId = "acc_flower", displayName = "Bunga Teratai",  price = 4000, category = "aksesoris_lain", isOwned = false },
-            new AccessoryData { accessoryId = "acc_ribbon", displayName = "Pita Cantik",    price = 6000, category = "aksesoris_lain", isOwned = false }
+            // ── Glasses (3) ──
+            new AccessoryData { accessoryId = "glasses_fancy",    displayName = "Fancy Glasses",        price = 6000,  category = "kacamata", isOwned = false },
+            new AccessoryData { accessoryId = "glasses_redsand",  displayName = "Evil Redsand Glasses", price = 9000,  category = "kacamata", isOwned = false },
+            new AccessoryData { accessoryId = "glasses_starfish", displayName = "Starfish Eyesocket",   price = 12000, category = "kacamata", isOwned = false }
         };
     }
 
@@ -114,7 +102,7 @@ public static class PlayerDataRepository
 
             if (save != null)
             {
-                points = save.points;
+                points = Mathf.Max(save.points, DEFAULT_STARTING_POINTS);
                 playerFish.colorVariant = !string.IsNullOrEmpty(save.colorVariant) ? save.colorVariant : "red";
                 playerFish.selectedAccessoryId = save.selectedAccessoryId;
 
@@ -184,6 +172,16 @@ public static class PlayerDataRepository
     {
         EnsureInitialized();
         points += amount;
+        Save();
+    }
+
+    /// <summary>
+    /// Sets the exact points balance and persists immediately.
+    /// </summary>
+    public static void SetPoints(int amount)
+    {
+        EnsureInitialized();
+        points = amount;
         Save();
     }
 

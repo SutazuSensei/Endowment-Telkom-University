@@ -1,8 +1,23 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 
 public class SetupFishTool : EditorWindow
 {
+    [MenuItem("Tools/Set Points to 100,000")]
+    public static void SetPointsTo100k()
+    {
+        PlayerDataRepository.SetPoints(100000);
+        Debug.Log("[SetupFishTool] Uang / Points berhasil diubah menjadi 100,000!");
+    }
+
+    [MenuItem("Tools/Reset All Save Data")]
+    public static void ResetSaveData()
+    {
+        PlayerDataRepository.ResetAllData();
+        Debug.Log("[SetupFishTool] Save data berhasil di-reset dengan poin awal 100,000!");
+    }
+
     [MenuItem("Tools/Setup All Fish Config")]
     public static void SetupAllFish()
     {
@@ -186,6 +201,198 @@ public class SetupFishTool : EditorWindow
         if (!appliedAny)
         {
             Debug.LogWarning("[SetupFishTool] Tidak menemukan Script apa-apa untuk di-setup. Buka scene Aquarium, Collection, atau Big Aquarium lalu jalankan lagi.");
+        }
+
+        // ==========================================
+        // 6. Setup All Accessories (Hats + Glasses)
+        // ==========================================
+        SetupAllAccessories();
+    }
+
+    private static void SetupAllAccessories()
+    {
+        // Load Hat sprites
+        string pathHat = "Assets/Sprites/Accessories/Hat/";
+        Sprite hatBigtop  = AssetDatabase.LoadAssetAtPath<Sprite>(pathHat + "Big Top Hat.png");
+        Sprite hatCowboy  = AssetDatabase.LoadAssetAtPath<Sprite>(pathHat + "Cowboy Honour.png");
+        Sprite hatSailor  = AssetDatabase.LoadAssetAtPath<Sprite>(pathHat + "Sailor Hat.png");
+        Sprite hatUnicorn = AssetDatabase.LoadAssetAtPath<Sprite>(pathHat + "Unicorn Hat.png");
+
+        // Load Glasses sprites
+        string pathGlasses = "Assets/Sprites/Accessories/Glasses/";
+        Sprite glassFancy    = AssetDatabase.LoadAssetAtPath<Sprite>(pathGlasses + "Fancy Glasses.png");
+        Sprite glassRedsand  = AssetDatabase.LoadAssetAtPath<Sprite>(pathGlasses + "Evil Redsand Glasses.png");
+        Sprite glassStarfish = AssetDatabase.LoadAssetAtPath<Sprite>(pathGlasses + "Starfish Eyesocket.png");
+
+        if (hatBigtop == null || hatCowboy == null || hatSailor == null || hatUnicorn == null)
+        {
+            Debug.LogWarning("[SetupFishTool] Gagal memuat sprite Hat.");
+        }
+        if (glassFancy == null || glassRedsand == null || glassStarfish == null)
+        {
+            Debug.LogWarning("[SetupFishTool] Gagal memuat sprite Glasses.");
+        }
+
+        // Gabungkan semua aksesoris
+        string[] allIds = { "hat_bigtop", "hat_cowboy", "hat_sailor", "hat_unicorn", "glasses_fancy", "glasses_redsand", "glasses_starfish" };
+        Sprite[] allSprites = { hatBigtop, hatCowboy, hatSailor, hatUnicorn, glassFancy, glassRedsand, glassStarfish };
+
+        // Default placement values (Anda bisa fine-tune di Inspector nanti!)
+        // Format: offset, scale, rotation — per tier
+        // Offset relatif terhadap pusat ikan; Scale (1,1) = ukuran default sprite
+        Vector2 defaultScale = new Vector2(1f, 1f);
+
+        bool injectedAny = false;
+
+        // Inject ke FishColorApplier (Aquarium)
+        #if UNITY_2023_1_OR_NEWER
+        FishColorApplier applier = FindFirstObjectByType<FishColorApplier>(FindObjectsInactive.Include);
+        #else
+        FishColorApplier applier = FindObjectOfType<FishColorApplier>(true);
+        #endif
+
+        if (applier != null)
+        {
+            SerializedObject so = new SerializedObject(applier);
+            SerializedProperty accProp = so.FindProperty("accessories");
+            
+            // Backup existing placements
+            var existingPlacements = BackupPlacements(accProp);
+
+            accProp.ClearArray();
+            accProp.arraySize = allIds.Length;
+
+            for (int i = 0; i < allIds.Length; i++)
+            {
+                SerializedProperty el = accProp.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("accessoryId").stringValue = allIds[i];
+                el.FindPropertyRelative("accessorySprite").objectReferenceValue = allSprites[i];
+
+                SerializedProperty placements = el.FindPropertyRelative("placements");
+                SetupDefaultPlacements(placements, defaultScale);
+                RestorePlacements(placements, allIds[i], existingPlacements);
+            }
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(applier);
+            Debug.Log($"[SetupFishTool] Berhasil menyuntikkan {allIds.Length} aksesoris ke FishColorApplier (Aquarium).");
+            injectedAny = true;
+        }
+
+        // Inject ke CollectionUIController (Collection)
+        #if UNITY_2023_1_OR_NEWER
+        CollectionUIController collUI = FindFirstObjectByType<CollectionUIController>(FindObjectsInactive.Include);
+        #else
+        CollectionUIController collUI = FindObjectOfType<CollectionUIController>(true);
+        #endif
+
+        if (collUI != null)
+        {
+            SerializedObject so = new SerializedObject(collUI);
+            SerializedProperty accProp = so.FindProperty("accessoryItems");
+            
+            // Backup existing placements
+            var existingPlacements = BackupPlacements(accProp);
+
+            // Clear dan isi ulang semua aksesoris
+            accProp.ClearArray();
+            accProp.arraySize = allIds.Length;
+
+            for (int i = 0; i < allIds.Length; i++)
+            {
+                SerializedProperty el = accProp.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("accessoryId").stringValue = allIds[i];
+                el.FindPropertyRelative("displayName").stringValue = allIds[i].Replace("hat_", "").Replace("glasses_", "").Replace("_", " ");
+                el.FindPropertyRelative("accessorySprite").objectReferenceValue = allSprites[i];
+
+                SerializedProperty placements = el.FindPropertyRelative("placements");
+                SetupDefaultPlacements(placements, defaultScale);
+                RestorePlacements(placements, allIds[i], existingPlacements);
+            }
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(collUI);
+            Debug.Log($"[SetupFishTool] Berhasil menyuntikkan {allIds.Length} aksesoris ke CollectionUIController (Collection).");
+            injectedAny = true;
+        }
+
+        if (!injectedAny)
+        {
+            Debug.LogWarning("[SetupFishTool] Tidak menemukan FishColorApplier atau CollectionUIController untuk inject aksesoris. Pastikan scene yang benar sedang terbuka.");
+        }
+    }
+
+    private class BackupData
+    {
+        public Vector2 offset;
+        public Vector2 scale;
+        public float rotation;
+    }
+
+    private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<BackupData>> BackupPlacements(SerializedProperty accProp)
+    {
+        var backup = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<BackupData>>();
+        if (accProp == null) return backup;
+
+        for (int i = 0; i < accProp.arraySize; i++)
+        {
+            SerializedProperty el = accProp.GetArrayElementAtIndex(i);
+            string accId = el.FindPropertyRelative("accessoryId").stringValue;
+            SerializedProperty placements = el.FindPropertyRelative("placements");
+            if (placements != null && placements.arraySize > 0)
+            {
+                var list = new System.Collections.Generic.List<BackupData>();
+                for (int j = 0; j < placements.arraySize; j++)
+                {
+                    SerializedProperty p = placements.GetArrayElementAtIndex(j);
+                    list.Add(new BackupData
+                    {
+                        offset = p.FindPropertyRelative("offset").vector2Value,
+                        scale = p.FindPropertyRelative("scale").vector2Value,
+                        rotation = p.FindPropertyRelative("rotation").floatValue
+                    });
+                }
+                backup[accId] = list;
+            }
+        }
+        return backup;
+    }
+
+    private static void RestorePlacements(SerializedProperty placements, string accId, System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<BackupData>> backup)
+    {
+        if (backup.TryGetValue(accId, out var list) && placements != null)
+        {
+            for (int i = 0; i < Mathf.Min(placements.arraySize, list.Count); i++)
+            {
+                SerializedProperty p = placements.GetArrayElementAtIndex(i);
+                p.FindPropertyRelative("offset").vector2Value = list[i].offset;
+                p.FindPropertyRelative("scale").vector2Value = list[i].scale;
+                p.FindPropertyRelative("rotation").floatValue = list[i].rotation;
+            }
+        }
+    }
+
+    private static void SetupDefaultPlacements(SerializedProperty placements, Vector2 defaultScale)
+    {
+        string[] tiers = { "Common", "Rare", "Epic", "Legendary" };
+        // Default offsets per tier (sesuaikan di Inspector nanti!)
+        Vector2[] defaultOffsets = {
+            new Vector2(30f, 40f),   // Common (Clownfish) — topi di atas kepala kanan
+            new Vector2(40f, 50f),   // Rare (Tuna)
+            new Vector2(20f, 60f),   // Epic (Stingray)
+            new Vector2(50f, 80f),   // Legendary (Whale)
+        };
+
+        placements.ClearArray();
+        placements.arraySize = tiers.Length;
+
+        for (int i = 0; i < tiers.Length; i++)
+        {
+            SerializedProperty p = placements.GetArrayElementAtIndex(i);
+            p.FindPropertyRelative("tier").stringValue = tiers[i];
+            p.FindPropertyRelative("offset").vector2Value = defaultOffsets[i];
+            p.FindPropertyRelative("scale").vector2Value = defaultScale;
+            p.FindPropertyRelative("rotation").floatValue = 0f;
         }
     }
 

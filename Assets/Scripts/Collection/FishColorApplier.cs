@@ -28,13 +28,32 @@ public class FishColorApplier : MonoBehaviour
     }
 
     [System.Serializable]
-    public struct AccessorySprite
+    public struct AccessoryPlacement
     {
-        [Tooltip("Unique accessory ID matching CollectionUIController (e.g. 'hat_01', 'glasses_01').")]
+        [Tooltip("The fish tier this placement applies to (e.g. 'Common', 'Rare', 'Epic', 'Legendary').")] 
+        public string tier;
+
+        [Tooltip("Position offset relative to the fish center.")]
+        public Vector2 offset;
+
+        [Tooltip("Scale of the accessory (1,1 = default sprite size).")]
+        public Vector2 scale;
+
+        [Tooltip("Rotation in degrees.")]
+        public float rotation;
+    }
+
+    [System.Serializable]
+    public struct AccessoryConfig
+    {
+        [Tooltip("Unique accessory ID matching PlayerDataRepository (e.g. 'hat_bigtop', 'hat_cowboy').")]
         public string accessoryId;
 
         [Tooltip("The accessory sprite overlay.")]
         public Sprite accessorySprite;
+
+        [Tooltip("Per-tier placement data (offset, scale, rotation). One entry per tier.")]
+        public AccessoryPlacement[] placements;
     }
 
     [Header("UI References")]
@@ -49,8 +68,8 @@ public class FishColorApplier : MonoBehaviour
     [SerializeField] private TierColorSprite[] fishSprites;
 
     [Header("Accessories")]
-    [Tooltip("List of accessories and their matching sprites for the Personal Aquarium.")]
-    [SerializeField] private AccessorySprite[] accessories;
+    [Tooltip("List of accessories with per-tier placement data.")]
+    [SerializeField] private AccessoryConfig[] accessories;
 
     private void Awake()
     {
@@ -79,23 +98,29 @@ public class FishColorApplier : MonoBehaviour
             if (TryGetConfigForFish(data.tier, data.colorVariant, out TierColorSprite config))
             {
                 if (config.fishSprite != null)
+                {
                     fishImage.sprite = config.fishSprite;
+                    fishImage.preserveAspect = true;
+                }
 
                 if (config.customSize != Vector2.zero)
                     fishImage.rectTransform.sizeDelta = config.customSize;
             }
         }
 
-        // Apply Accessory Overlay
+        // Apply Accessory Overlay with Placement
         if (accessoryOverlayImage != null)
         {
             if (!string.IsNullOrEmpty(data.selectedAccessoryId))
             {
-                Sprite accSprite = GetSpriteForAccessory(data.selectedAccessoryId);
-                if (accSprite != null)
+                AccessoryConfig? accConfig = GetAccessoryConfig(data.selectedAccessoryId);
+                if (accConfig.HasValue && accConfig.Value.accessorySprite != null)
                 {
-                    accessoryOverlayImage.sprite = accSprite;
+                    accessoryOverlayImage.sprite = accConfig.Value.accessorySprite;
                     accessoryOverlayImage.enabled = true;
+
+                    // Apply per-tier placement
+                    ApplyPlacement(accessoryOverlayImage, accConfig.Value.placements, data.tier);
                 }
                 else
                 {
@@ -138,16 +163,40 @@ public class FishColorApplier : MonoBehaviour
         return foundFallback;
     }
 
-    private Sprite GetSpriteForAccessory(string accessoryId)
+    private AccessoryConfig? GetAccessoryConfig(string accessoryId)
     {
         if (accessories == null) return null;
         foreach (var item in accessories)
         {
             if (string.Equals(item.accessoryId, accessoryId, System.StringComparison.OrdinalIgnoreCase))
             {
-                return item.accessorySprite;
+                return item;
             }
         }
         return null;
+    }
+
+    private void ApplyPlacement(Image overlayImage, AccessoryPlacement[] placements, string tier)
+    {
+        if (placements == null || placements.Length == 0) return;
+
+        // Find placement for current tier, fallback to first entry
+        AccessoryPlacement placement = placements[0];
+        foreach (var p in placements)
+        {
+            if (string.Equals(p.tier, tier, System.StringComparison.OrdinalIgnoreCase))
+            {
+                placement = p;
+                break;
+            }
+        }
+
+        RectTransform rt = overlayImage.rectTransform;
+        rt.anchoredPosition = placement.offset;
+
+        if (placement.scale != Vector2.zero)
+            rt.localScale = new Vector3(placement.scale.x, placement.scale.y, 1f);
+
+        rt.localRotation = Quaternion.Euler(0f, 0f, placement.rotation);
     }
 }

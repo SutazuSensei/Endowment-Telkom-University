@@ -44,9 +44,25 @@ public class CollectionUIController : MonoBehaviour
     }
 
     [System.Serializable]
+    public struct AccessoryPlacement
+    {
+        [Tooltip("The fish tier this placement applies to (e.g. 'Common', 'Rare', 'Epic', 'Legendary').")] 
+        public string tier;
+
+        [Tooltip("Position offset relative to the fish center.")]
+        public Vector2 offset;
+
+        [Tooltip("Scale of the accessory (1,1 = default sprite size).")]
+        public Vector2 scale;
+
+        [Tooltip("Rotation in degrees.")]
+        public float rotation;
+    }
+
+    [System.Serializable]
     public struct AccessoryItem
     {
-        [Tooltip("Unique accessory ID (e.g. 'hat_01', 'glasses_01').")]
+        [Tooltip("Unique accessory ID (e.g. 'hat_bigtop', 'hat_cowboy').")]
         public string accessoryId;
 
         [Tooltip("Display name shown in UI.")]
@@ -57,6 +73,9 @@ public class CollectionUIController : MonoBehaviour
 
         [Tooltip("UI Button in the accessory grid to equip this accessory.")]
         public Button accessoryButton;
+
+        [Tooltip("Per-tier placement data (offset, scale, rotation). One entry per tier.")]
+        public AccessoryPlacement[] placements;
     }
 
     [Header("Showcase UI References")]
@@ -143,6 +162,7 @@ public class CollectionUIController : MonoBehaviour
             if (fishShowcaseImage != null && config.fishSprite != null)
             {
                 fishShowcaseImage.sprite = config.fishSprite;
+                fishShowcaseImage.preserveAspect = true;
             }
 
             if (fishShowcaseImage != null && config.customSize != Vector2.zero)
@@ -151,16 +171,19 @@ public class CollectionUIController : MonoBehaviour
             }
         }
 
-        // Update Accessory Overlay
+        // Update Accessory Overlay with Placement
         if (accessoryOverlayImage != null)
         {
             if (!string.IsNullOrEmpty(data.selectedAccessoryId))
             {
-                Sprite accSprite = GetSpriteForAccessory(data.selectedAccessoryId);
-                if (accSprite != null)
+                AccessoryItem? accItem = GetAccessoryItem(data.selectedAccessoryId);
+                if (accItem.HasValue && accItem.Value.accessorySprite != null)
                 {
-                    accessoryOverlayImage.sprite = accSprite;
+                    accessoryOverlayImage.sprite = accItem.Value.accessorySprite;
                     accessoryOverlayImage.enabled = true;
+
+                    // Apply per-tier placement
+                    ApplyPlacement(accessoryOverlayImage, accItem.Value.placements, data.tier);
                 }
                 else
                 {
@@ -253,16 +276,46 @@ public class CollectionUIController : MonoBehaviour
         return foundFallback;
     }
 
-    private Sprite GetSpriteForAccessory(string accessoryId)
+    private AccessoryItem? GetAccessoryItem(string accessoryId)
     {
         if (accessoryItems == null) return null;
         foreach (var item in accessoryItems)
         {
             if (string.Equals(item.accessoryId, accessoryId, System.StringComparison.OrdinalIgnoreCase))
             {
-                return item.accessorySprite;
+                return item;
             }
         }
         return null;
+    }
+
+    private Sprite GetSpriteForAccessory(string accessoryId)
+    {
+        var item = GetAccessoryItem(accessoryId);
+        return item?.accessorySprite;
+    }
+
+    private void ApplyPlacement(Image overlayImage, AccessoryPlacement[] placements, string tier)
+    {
+        if (placements == null || placements.Length == 0) return;
+
+        // Find placement for current tier, fallback to first entry
+        AccessoryPlacement placement = placements[0];
+        foreach (var p in placements)
+        {
+            if (string.Equals(p.tier, tier, System.StringComparison.OrdinalIgnoreCase))
+            {
+                placement = p;
+                break;
+            }
+        }
+
+        RectTransform rt = overlayImage.rectTransform;
+        rt.anchoredPosition = placement.offset;
+
+        if (placement.scale != Vector2.zero)
+            rt.localScale = new Vector3(placement.scale.x, placement.scale.y, 1f);
+
+        rt.localRotation = Quaternion.Euler(0f, 0f, placement.rotation);
     }
 }

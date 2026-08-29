@@ -16,12 +16,33 @@ public class AquariumFish : MonoBehaviour
         public Color textColor;
     }
 
+    [System.Serializable]
+    public struct AccessoryPlacement
+    {
+        public string tier;
+        public Vector2 offset;
+        public Vector2 scale;
+        public float rotation;
+    }
+
+    [System.Serializable]
+    public struct AccessoryConfig
+    {
+        public string accessoryId;
+        public Sprite accessorySprite;
+        public AccessoryPlacement[] placements;
+    }
+
     [Header("UI References")]
     public Image fishImage;
+    public Image accessoryImage;
     public TextMeshProUGUI ownerNameText;
 
     [Header("Rarity Settings")]
     public FishRarityConfig[] rarityConfigs;
+
+    [Header("Accessory Settings")]
+    public AccessoryConfig[] accessoryConfigs;
 
     private FishMovement movementScript;
 
@@ -38,7 +59,7 @@ public class AquariumFish : MonoBehaviour
         }
     }
 
-    public void SetupFish(string ownerName, string fishRarity, string colorVariant = "")
+    public void SetupFish(string ownerName, string fishRarity, string colorVariant = "", string accessoryId = "")
     {
         movementScript = GetComponent<FishMovement>();
 
@@ -50,6 +71,9 @@ public class AquariumFish : MonoBehaviour
 
         // 2. Apply Custom Sprite & Size based on Rarity Configs
         ApplyRarityConfig(fishRarity, colorVariant);
+
+        // 3. Apply Accessory if provided
+        ApplyAccessory(accessoryId, fishRarity);
     }
 
     private void ApplyRarityConfig(string rarity, string colorVariant)
@@ -81,6 +105,7 @@ public class AquariumFish : MonoBehaviour
         if (fishImage != null && config.fishSprite != null)
         {
             fishImage.sprite = config.fishSprite;
+            fishImage.preserveAspect = true;
         }
 
         // Set Custom Size
@@ -95,5 +120,51 @@ public class AquariumFish : MonoBehaviour
         {
             ownerNameText.color = config.textColor;
         }
+    }
+
+    private void ApplyAccessory(string accessoryId, string tier)
+    {
+        if (accessoryImage == null) return;
+
+        if (string.IsNullOrEmpty(accessoryId) || accessoryConfigs == null)
+        {
+            accessoryImage.enabled = false;
+            return;
+        }
+
+        foreach (var acc in accessoryConfigs)
+        {
+            if (string.Equals(acc.accessoryId, accessoryId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                if (acc.accessorySprite != null)
+                {
+                    accessoryImage.sprite = acc.accessorySprite;
+                    accessoryImage.enabled = true;
+
+                    // Apply per-tier placement
+                    if (acc.placements != null && acc.placements.Length > 0)
+                    {
+                        AccessoryPlacement placement = acc.placements[0];
+                        foreach (var p in acc.placements)
+                        {
+                            if (string.Equals(p.tier, tier, System.StringComparison.OrdinalIgnoreCase))
+                            {
+                                placement = p;
+                                break;
+                            }
+                        }
+
+                        RectTransform rt = accessoryImage.rectTransform;
+                        rt.anchoredPosition = placement.offset;
+                        if (placement.scale != Vector2.zero)
+                            rt.localScale = new Vector3(placement.scale.x, placement.scale.y, 1f);
+                        rt.localRotation = Quaternion.Euler(0f, 0f, placement.rotation);
+                    }
+                }
+                return;
+            }
+        }
+
+        accessoryImage.enabled = false;
     }
 }
