@@ -31,6 +31,10 @@ public class DonationUIController : MonoBehaviour
     [Tooltip("Reference to FishColorApplier in the scene to immediately refresh the fish visual after tier change.")]
     [SerializeField] private FishColorApplier fishColorApplier;
 
+    [Header("Active Donation Display")]
+    [Tooltip("Text to display the donation amount based on active tier.")]
+    [SerializeField] private TextMeshProUGUI activeDonationText;
+
     private void Start()
     {
         // Hide panel by default
@@ -46,6 +50,7 @@ public class DonationUIController : MonoBehaviour
         }
 
         SetupListeners();
+        UpdateDonationAmountText();
     }
 
     private void SetupListeners()
@@ -88,9 +93,40 @@ public class DonationUIController : MonoBehaviour
             Debug.LogWarning("[DonationUIController] FishColorApplier not found. Visual won't update until next load.");
         }
 
+        UpdateDonationAmountText();
+
         // 3. Hide panel
         HidePanel();
 
         Debug.Log($"[DonationUIController] Simulated donation for tier: {tier}");
+    }
+
+    public void UpdateDonationAmountText()
+    {
+        if (activeDonationText == null) return;
+        
+        string currentTier = PlayerDataRepository.GetPlayerFish().tier;
+        string amountString = "";
+        
+        switch (currentTier)
+        {
+            case "Common":
+                amountString = "Rp 500.000";
+                break;
+            case "Rare":
+                amountString = "Rp 5.000.000";
+                break;
+            case "Epic":
+                amountString = "Rp 25.000.000";
+                break;
+            case "Legendary":
+                amountString = "Rp 25.000.000";
+                break;
+            default:
+                amountString = "Rp 0";
+                break;
+        }
+        
+        activeDonationText.text = amountString;
     }
 }

@@ -81,8 +81,8 @@ public static class PlayerDataRepository
 
             // ── Glasses (3) ──
             new AccessoryData { accessoryId = "glasses_fancy",    displayName = "Fancy Glasses",        price = 6000,  category = "kacamata", isOwned = false },
-            new AccessoryData { accessoryId = "glasses_redsand",  displayName = "Evil Redsand Glasses", price = 9000,  category = "kacamata", isOwned = false },
-            new AccessoryData { accessoryId = "glasses_starfish", displayName = "Starfish Eyesocket",   price = 12000, category = "kacamata", isOwned = false }
+            new AccessoryData { accessoryId = "glasses_redsand",  displayName = "Evil Glasses", price = 9000,  category = "kacamata", isOwned = false },
+            new AccessoryData { accessoryId = "glasses_starfish", displayName = "Starfish Eye",   price = 12000, category = "kacamata", isOwned = false }
         };
     }
 

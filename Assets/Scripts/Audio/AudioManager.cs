@@ -57,6 +57,13 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
+        // Load saved volumes or default to 1.0
+        float bgmVol = PlayerPrefs.GetFloat("BGM_Volume", 1f);
+        float sfxVol = PlayerPrefs.GetFloat("SFX_Volume", 1f);
+
+        SetBGMVolume(bgmVol);
+        SetSFXVolume(sfxVol);
+
         // Start continuous loops
         if (bgmSource != null && bgmClip != null)
         {
@@ -71,6 +78,31 @@ public class AudioManager : MonoBehaviour
             ambientSource.loop = true;
             if (!ambientSource.isPlaying) ambientSource.Play();
         }
+    }
+
+    public void SetBGMVolume(float volume)
+    {
+        if (bgmSource != null) bgmSource.volume = volume;
+        if (ambientSource != null) ambientSource.volume = volume;
+        PlayerPrefs.SetFloat("BGM_Volume", volume);
+        PlayerPrefs.Save();
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        if (sfxSource != null) sfxSource.volume = volume;
+        PlayerPrefs.SetFloat("SFX_Volume", volume);
+        PlayerPrefs.Save();
+    }
+
+    public float GetBGMVolume()
+    {
+        return PlayerPrefs.GetFloat("BGM_Volume", 1f);
+    }
+
+    public float GetSFXVolume()
+    {
+        return PlayerPrefs.GetFloat("SFX_Volume", 1f);
     }
 
     /// <summary>

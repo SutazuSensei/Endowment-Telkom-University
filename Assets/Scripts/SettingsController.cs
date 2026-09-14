@@ -27,6 +27,13 @@ public class SettingsController : MonoBehaviour
     [Tooltip("The Back Button inside the Volume Panel that closes it.")]
     [SerializeField] private Button btnVolumeBack;
 
+    [Header("Sliders")]
+    [Tooltip("Slider to control Background Music & Ambient volume.")]
+    [SerializeField] private Slider musicSlider;
+
+    [Tooltip("Slider to control Sound Effects volume.")]
+    [SerializeField] private Slider sfxSlider;
+
     [Header("Behavior")]
     [Tooltip("If true, automatically hides both Settings and Volume panels when the scene starts.")]
     [SerializeField] private bool closeOnStart = true;
@@ -58,28 +65,50 @@ public class SettingsController : MonoBehaviour
         {
             btnVolumeBack.onClick.AddListener(CloseVolume);
         }
+
+        // Initialize Sliders from AudioManager
+        if (AudioManager.Instance != null)
+        {
+            if (musicSlider != null)
+            {
+                musicSlider.value = AudioManager.Instance.GetBGMVolume();
+                musicSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            }
+
+            if (sfxSlider != null)
+            {
+                sfxSlider.value = AudioManager.Instance.GetSFXVolume();
+                sfxSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+            }
+        }
     }
 
     private void OnDestroy()
     {
-        if (btnSettings != null)
-        {
-            btnSettings.onClick.RemoveListener(OpenSettings);
-        }
+        if (btnSettings != null) btnSettings.onClick.RemoveListener(OpenSettings);
+        if (btnBack != null) btnBack.onClick.RemoveListener(CloseSettings);
+        if (btnVolume != null) btnVolume.onClick.RemoveListener(OpenVolume);
+        if (btnVolumeBack != null) btnVolumeBack.onClick.RemoveListener(CloseVolume);
 
-        if (btnBack != null)
-        {
-            btnBack.onClick.RemoveListener(CloseSettings);
-        }
+        if (musicSlider != null) musicSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+        if (sfxSlider != null) sfxSlider.onValueChanged.RemoveListener(OnSFXVolumeChanged);
+    }
 
-        if (btnVolume != null)
-        {
-            btnVolume.onClick.RemoveListener(OpenVolume);
-        }
+    // ───────────────────────────── Volume Control ─────────────────────────────
 
-        if (btnVolumeBack != null)
+    private void OnMusicVolumeChanged(float value)
+    {
+        if (AudioManager.Instance != null)
         {
-            btnVolumeBack.onClick.RemoveListener(CloseVolume);
+            AudioManager.Instance.SetBGMVolume(value);
+        }
+    }
+
+    private void OnSFXVolumeChanged(float value)
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetSFXVolume(value);
         }
     }
 

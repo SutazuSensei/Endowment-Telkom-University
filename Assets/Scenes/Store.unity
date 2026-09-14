@@ -949,7 +949,21 @@ MonoBehaviour:
     button: {fileID: 1539418215}
   - tabId: Terpopuler
     button: {fileID: 1252000249}
-  accessoryIcons: []
+  accessoryIcons:
+  - accessoryId: hat_bigtop
+    icon: {fileID: 21300000, guid: d4437c182119e504ab683327e66d3b9d, type: 3}
+  - accessoryId: hat_cowboy
+    icon: {fileID: 21300000, guid: ebbb409fff4c1e04588aa9036c953417, type: 3}
+  - accessoryId: hat_sailor
+    icon: {fileID: 21300000, guid: aa5ecd27411602c479fa2f5e033fd4fb, type: 3}
+  - accessoryId: hat_unicorn
+    icon: {fileID: 21300000, guid: 57f39624190044b4a8d8f132973819ea, type: 3}
+  - accessoryId: glasses_fancy
+    icon: {fileID: 21300000, guid: eebb1eca2d6b9c446b423b4441799a6c, type: 3}
+  - accessoryId: glasses_redsand
+    icon: {fileID: 21300000, guid: 2e108746ca0a5ad4faf1fa20eb8d7a6f, type: 3}
+  - accessoryId: glasses_starfish
+    icon: {fileID: 21300000, guid: 6540db152f34d714eac9ac9c042858fb, type: 3}
   closeButton: {fileID: 1272299338}
   backSceneName: Aquarium
   confirmationPanel: {fileID: 1142902197}

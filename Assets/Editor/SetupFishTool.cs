@@ -316,9 +316,37 @@ public class SetupFishTool : EditorWindow
             injectedAny = true;
         }
 
+        // Inject ke StoreUIController (Store)
+        #if UNITY_2023_1_OR_NEWER
+        StoreUIController storeUI = FindFirstObjectByType<StoreUIController>(FindObjectsInactive.Include);
+        #else
+        StoreUIController storeUI = FindObjectOfType<StoreUIController>(true);
+        #endif
+
+        if (storeUI != null)
+        {
+            SerializedObject so = new SerializedObject(storeUI);
+            SerializedProperty accProp = so.FindProperty("accessoryIcons");
+            
+            accProp.ClearArray();
+            accProp.arraySize = allIds.Length;
+
+            for (int i = 0; i < allIds.Length; i++)
+            {
+                SerializedProperty el = accProp.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("accessoryId").stringValue = allIds[i];
+                el.FindPropertyRelative("icon").objectReferenceValue = allSprites[i];
+            }
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(storeUI);
+            Debug.Log($"[SetupFishTool] Berhasil menyuntikkan {allIds.Length} ikon ke StoreUIController (Store).");
+            injectedAny = true;
+        }
+
         if (!injectedAny)
         {
-            Debug.LogWarning("[SetupFishTool] Tidak menemukan FishColorApplier atau CollectionUIController untuk inject aksesoris. Pastikan scene yang benar sedang terbuka.");
+            Debug.LogWarning("[SetupFishTool] Tidak menemukan FishColorApplier, CollectionUIController, atau StoreUIController untuk inject aksesoris. Pastikan scene yang benar sedang terbuka.");
         }
     }
 
