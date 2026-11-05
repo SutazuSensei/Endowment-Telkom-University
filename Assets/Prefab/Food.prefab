@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 30, y: 30}
+  m_SizeDelta: {x: 55, y: 48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7817062030962722364
 CanvasRenderer:
@@ -59,16 +59,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.4433962, g: 0.20534736, b: 0.0020914965, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -475503678, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -92,3 +92,56 @@ MonoBehaviour:
   spawnTopPadding: 40
   bottomPadding: 40
   horizontalPadding: 50
+  animationFrames:
+  - {fileID: -475503678, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -695785097, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -910779913, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1173511966, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 187357072, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -956810139, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -881092676, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -78432796, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 2126550211, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1073883164, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 996031875, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1424552910, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1468237620, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1314459553, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -2035195117, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1130939864, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1908096641, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1632619760, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1040446242, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1490997666, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1206839193, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -877566421, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -753416356, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1550772773, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -368265543, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -2071597369, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1033830693, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 830008708, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1460845898, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 370000943, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1919603773, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -170583817, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 490284983, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1471729116, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -2083534819, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 731630637, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1349945592, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 192065220, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1272937004, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -1032338514, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -2072672090, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 2110876816, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 149664370, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1096617535, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 938138410, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 463873583, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: -321547953, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  - {fileID: 1941771342, guid: 0ac82854cd7c6429a91bd78b9ba6e094, type: 3}
+  frameRate: 24
+  targetImage: {fileID: 8838882780223474807}
+  swayAmplitude: 18
+  swayFrequency: 2.5

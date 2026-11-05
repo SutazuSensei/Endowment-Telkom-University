@@ -1,0 +1,1247 @@
+fileFormatVersion: 2
+guid: 0ac82854cd7c6429a91bd78b9ba6e094
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93b33ec9801474df383864720c9a4608
+      internalID: -475503678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 572561ea2ba404301af8a07e97a06c19
+      internalID: -695785097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 227bc201d7ba1470494f4b844baacdc5
+      internalID: -910779913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30663d07337dd43cfb953c4a161f49ec
+      internalID: 1173511966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5faf34ca9f5c242cd950a8ce16f4ab27
+      internalID: 187357072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94c344d988a0945aa9fa7e7d242e63eb
+      internalID: -956810139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0dd9d4bcd24d54cfdabdd61589996bf8
+      internalID: -881092676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 836
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ec560175e9c0436d8b4c6cc8ba496b5
+      internalID: -78432796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6e2ca3707e374633b7154f702a452df
+      internalID: 2126550211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99717f1c61f964f34bc3eef3bb79754e
+      internalID: 1073883164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd571719f37754e2a8ed94777fbeab8f
+      internalID: 996031875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2fce701894a446429fc60fba50cb0db
+      internalID: 1424552910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe82ac9420de74336b4b1929beef4afd
+      internalID: 1468237620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 137daa87bf00040a98b55cb14c0522d1
+      internalID: -1314459553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5ac52521361c48e693ad3910bfce64e
+      internalID: -2035195117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 669
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 998b85b3c19cf40ca9b3e192bb553a8c
+      internalID: -1130939864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05ecdadcf4aff4703b07e2d11e4d6f0a
+      internalID: 1908096641
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f318f14f1eaea4ceb80dfbd7d5ccdb4b
+      internalID: 1632619760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ee5d383d1a4d49b7a4657078bb8b897
+      internalID: -1040446242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97f89ed1e24f043ca858d6ed3626014d
+      internalID: 1490997666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75f014826abb5403b81cefc53e9390de
+      internalID: 1206839193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b153d55bc9a304beda48f3fa9efbcf39
+      internalID: -877566421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4546d144fbd6d4af2b9af78d5f42a9a1
+      internalID: -753416356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 502
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 609378e141bbd4ad39dbe95a65b7df84
+      internalID: -1550772773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af4dc0b09222c434c8aa3684e807402c
+      internalID: -368265543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 374ac08b8b5764460bf9f9ec0b599d93
+      internalID: -2071597369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 624bf1eb02abf40d9aa87ed0800af748
+      internalID: -1033830693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e32f9d1c42836424ea6ba7850ab52d8e
+      internalID: 830008708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c2ea54b19e1d44f1a726417d03937ff
+      internalID: 1460845898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: defa0441d757a4758b1fc9d830dcd11c
+      internalID: 370000943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c07ffe28c18043a3a2a3bab74cea9a8
+      internalID: 1919603773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 335
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e741810231d6843f3bd325c4d269f0dc
+      internalID: -170583817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5298437449a954a0b90f413e5d06fd2b
+      internalID: 490284983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 522acabdb4f9c49af8b3505ad6865d44
+      internalID: -1471729116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9af21174857854f61bfd455c5e03b333
+      internalID: -2083534819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be62015f51f344743b72e7fe021a0a13
+      internalID: 731630637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e721268cca0a147afae9ca7d173b23d4
+      internalID: 1349945592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7984f746b588844c58f32ba85fcb9b11
+      internalID: 192065220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 416bad40b9f4a4bc4adfcd20764341b4
+      internalID: 1272937004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 168
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b7f2e3c360d84fd7a7d27629c4cb922
+      internalID: -1032338514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b2ca2fd801ff64c1d857635a00e69443
+      internalID: -2072672090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_41
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 202b9fbc624484869b26dc641242d28a
+      internalID: 2110876816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_42
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e220aa9861cc6432b92efd0cdebfd382
+      internalID: 149664370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_43
+      rect:
+        serializedVersion: 2
+        x: 589
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 942d4d73b22ed47938c0b7a7ef45c1d7
+      internalID: 1096617535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_44
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f26bb7e9168694ad1b19aca1583e2615
+      internalID: 938138410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_45
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1844d82eabae463eb4008f94dc31f69
+      internalID: 463873583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_46
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 623a79caf7d1e4cee8709bd48fe5eac6
+      internalID: -321547953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wriggling Red Worm Sprite Sheet_47
+      rect:
+        serializedVersion: 2
+        x: 1345
+        y: 1
+        width: 189
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 348042d1fcfa54aefa4d6a525b0577df
+      internalID: 1941771342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: a2fde5d0c99f34091bc63916acbeb2a3
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Wriggling Red Worm Sprite Sheet_0: -475503678
+      Wriggling Red Worm Sprite Sheet_1: -695785097
+      Wriggling Red Worm Sprite Sheet_10: 996031875
+      Wriggling Red Worm Sprite Sheet_11: 1424552910
+      Wriggling Red Worm Sprite Sheet_12: 1468237620
+      Wriggling Red Worm Sprite Sheet_13: -1314459553
+      Wriggling Red Worm Sprite Sheet_14: -2035195117
+      Wriggling Red Worm Sprite Sheet_15: -1130939864
+      Wriggling Red Worm Sprite Sheet_16: 1908096641
+      Wriggling Red Worm Sprite Sheet_17: 1632619760
+      Wriggling Red Worm Sprite Sheet_18: -1040446242
+      Wriggling Red Worm Sprite Sheet_19: 1490997666
+      Wriggling Red Worm Sprite Sheet_2: -910779913
+      Wriggling Red Worm Sprite Sheet_20: 1206839193
+      Wriggling Red Worm Sprite Sheet_21: -877566421
+      Wriggling Red Worm Sprite Sheet_22: -753416356
+      Wriggling Red Worm Sprite Sheet_23: -1550772773
+      Wriggling Red Worm Sprite Sheet_24: -368265543
+      Wriggling Red Worm Sprite Sheet_25: -2071597369
+      Wriggling Red Worm Sprite Sheet_26: -1033830693
+      Wriggling Red Worm Sprite Sheet_27: 830008708
+      Wriggling Red Worm Sprite Sheet_28: 1460845898
+      Wriggling Red Worm Sprite Sheet_29: 370000943
+      Wriggling Red Worm Sprite Sheet_3: 1173511966
+      Wriggling Red Worm Sprite Sheet_30: 1919603773
+      Wriggling Red Worm Sprite Sheet_31: -170583817
+      Wriggling Red Worm Sprite Sheet_32: 490284983
+      Wriggling Red Worm Sprite Sheet_33: -1471729116
+      Wriggling Red Worm Sprite Sheet_34: -2083534819
+      Wriggling Red Worm Sprite Sheet_35: 731630637
+      Wriggling Red Worm Sprite Sheet_36: 1349945592
+      Wriggling Red Worm Sprite Sheet_37: 192065220
+      Wriggling Red Worm Sprite Sheet_38: 1272937004
+      Wriggling Red Worm Sprite Sheet_39: -1032338514
+      Wriggling Red Worm Sprite Sheet_4: 187357072
+      Wriggling Red Worm Sprite Sheet_40: -2072672090
+      Wriggling Red Worm Sprite Sheet_41: 2110876816
+      Wriggling Red Worm Sprite Sheet_42: 149664370
+      Wriggling Red Worm Sprite Sheet_43: 1096617535
+      Wriggling Red Worm Sprite Sheet_44: 938138410
+      Wriggling Red Worm Sprite Sheet_45: 463873583
+      Wriggling Red Worm Sprite Sheet_46: -321547953
+      Wriggling Red Worm Sprite Sheet_47: 1941771342
+      Wriggling Red Worm Sprite Sheet_5: -956810139
+      Wriggling Red Worm Sprite Sheet_6: -881092676
+      Wriggling Red Worm Sprite Sheet_7: -78432796
+      Wriggling Red Worm Sprite Sheet_8: 2126550211
+      Wriggling Red Worm Sprite Sheet_9: 1073883164
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

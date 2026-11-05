@@ -136,6 +136,11 @@ public class FishMovement : MonoBehaviour
 
     private FoodController targetFood;
     private float eatingTimer;
+    private float currentHeadingX = 1f;
+
+    public float TargetFacing => targetFacing;
+    public float HeadingX => currentHeadingX;
+    public float NormalizedSpeed => (moveSpeedMax > 0.01f) ? Mathf.Clamp01(currentSpeed / moveSpeedMax) : 0f;
 
     // ───────────────────────────── Unity Lifecycle ─────────────────────────────
 
@@ -150,6 +155,7 @@ public class FishMovement : MonoBehaviour
 
         perlinSeed = Random.Range(0f, 1000f);
         float initialFacing = fishRect.localScale.x >= 0f ? 1f : -1f;
+        currentHeadingX = initialFacing;
         targetFacing = invertSpriteFacing ? -initialFacing : initialFacing;
     }
 
@@ -203,7 +209,8 @@ public class FishMovement : MonoBehaviour
     /// </summary>
     private Vector2 GetMouthPosition()
     {
-        return basePosition + new Vector2(mouthOffset.x * targetFacing, mouthOffset.y);
+        float heading = (GetComponent<Fish3DView>() != null) ? currentHeadingX : targetFacing;
+        return basePosition + new Vector2(mouthOffset.x * heading, mouthOffset.y);
     }
 
     private void UpdateFoodTargetTracking()
@@ -522,6 +529,7 @@ public class FishMovement : MonoBehaviour
                 if (Mathf.Abs(foodHorizontalDiff) > flipDeadZone)
                 {
                     float rawFacing = foodHorizontalDiff > 0f ? 1f : -1f;
+                    currentHeadingX = rawFacing;
                     targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
                 }
             }
@@ -532,6 +540,7 @@ public class FishMovement : MonoBehaviour
                 if (Mathf.Abs(horizontalDiff) > flipDeadZone)
                 {
                     float rawFacing = horizontalDiff > 0f ? 1f : -1f;
+                    currentHeadingX = rawFacing;
                     targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
                 }
             }
@@ -539,6 +548,7 @@ public class FishMovement : MonoBehaviour
 
         // Smoothly interpolate scale.x toward the target facing
         Vector3 scale = fishRect.localScale;
+        if (GetComponent<Fish3DView>() != null) { fishRect.localScale = Vector3.one; return; }
         scale.x = Mathf.Lerp(scale.x, targetFacing, flipSpeed * Time.deltaTime);
         fishRect.localScale = scale;
     }
@@ -562,6 +572,7 @@ public class FishMovement : MonoBehaviour
             }
         }
 
+        if (GetComponent<Fish3DView>() != null) { fishRect.localRotation = Quaternion.identity; return; }
         currentTiltAngle = Mathf.Lerp(currentTiltAngle, targetTilt, tiltSpeed * Time.deltaTime);
         fishRect.localRotation = Quaternion.Euler(0f, 0f, currentTiltAngle);
     }

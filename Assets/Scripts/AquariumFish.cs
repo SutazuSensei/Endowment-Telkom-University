@@ -75,6 +75,8 @@ public class AquariumFish : MonoBehaviour
 
         // 3. Apply Accessory if provided
         ApplyAccessory(accessoryId, fishRarity);
+        Fish3DView view3D = GetComponent<Fish3DView>();
+        if (view3D != null) view3D.ApplyCustomization(fishRarity, colorVariant, accessoryId);
     }
 
     private void ApplyRarityConfig(string rarity, string colorVariant)

@@ -155,6 +155,7 @@ public class CollectionUIController : MonoBehaviour
     {
         FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
+        if (fishShowcaseImage != null) { Fish3DView v3d = fishShowcaseImage.GetComponent<Fish3DView>(); if (v3d != null) v3d.ApplyCustomization(data.tier, data.colorVariant, data.selectedAccessoryId); }
 
         // Update Fish Sprite based on Tier + Color Variant
         if (TryGetConfigForFish(data.tier, data.colorVariant, out TierColorSprite config))

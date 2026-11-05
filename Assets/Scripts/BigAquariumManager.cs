@@ -9,6 +9,7 @@ public class BigAquariumFishData
 {
     public string tier;
     public string colorVariant;
+    public string accessoryId;
 }
 
 [Serializable]
@@ -92,6 +93,7 @@ public class BigAquariumManager : MonoBehaviour
         string[] sampleNames = { "Rudi", "Eka", "Dewi", "Fajar", "Gita", "Hana", "Irfan", "Joko", "Kiki", "Lani", "Maya", "Nico", "Rian", "Sari" };
         string[] sampleRarities = { "Common", "Rare", "Epic", "Legendary" };
         string[] sampleColors = { "red", "blue", "green", "yellow" };
+        string[] sampleAccessories = { "", "", "hat_bigtop", "hat_cowboy", "glasses_fancy", "glasses_redsand", "" };
 
         // Hitung total ikan saat ini
         int currentFishCount = 0;
@@ -112,7 +114,7 @@ public class BigAquariumManager : MonoBehaviour
             list.Add(new PlayerFishData
             {
                 name = randomName,
-                fish = new List<BigAquariumFishData> { new BigAquariumFishData { tier = randomRarity, colorVariant = randomColor } }
+                fish = new List<BigAquariumFishData> { new BigAquariumFishData { tier = randomRarity, colorVariant = randomColor, accessoryId = sampleAccessories[index % sampleAccessories.Length] } }
             });
 
             currentFishCount++;
@@ -162,7 +164,7 @@ public class BigAquariumManager : MonoBehaviour
                 AquariumFish fishScript = newFish.GetComponent<AquariumFish>();
                 if (fishScript != null)
                 {
-                    fishScript.SetupFish(player.name, fishData.tier, fishData.colorVariant);
+                    fishScript.SetupFish(player.name, fishData.tier, fishData.colorVariant, fishData.accessoryId);
                 }
 
                 totalSpawned++;

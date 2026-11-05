@@ -91,6 +91,8 @@ public class FishColorApplier : MonoBehaviour
     {
         FishData data = PlayerDataRepository.GetPlayerFish();
         if (data == null) return;
+        Fish3DView view3D = GetComponent<Fish3DView>();
+        if (view3D != null) view3D.ApplyCustomization(data.tier, data.colorVariant, data.selectedAccessoryId);
 
         // Apply Fish Sprite based on Tier + Color Variant
         if (fishImage != null && fishSprites != null)

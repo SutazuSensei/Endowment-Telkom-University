@@ -2084,7 +2084,7 @@ MonoBehaviour:
       offset: {x: -177.2, y: 59.9}
       scale: {x: 1, y: 1}
       rotation: 0
-  - accessoryId: EvilGlasses
+  - accessoryId: glasses_redsand
     displayName: EvilGlasses
     accessorySprite: {fileID: 21300000, guid: 2e108746ca0a5ad4faf1fa20eb8d7a6f, type: 3}
     accessoryButton: {fileID: 2143218861}
@@ -2105,7 +2105,7 @@ MonoBehaviour:
       offset: {x: -123.4, y: 25.9}
       scale: {x: 0.67, y: 0.67}
       rotation: 0
-  - accessoryId: FancyGlasses
+  - accessoryId: glasses_fancy
     displayName: FancyGlasses
     accessorySprite: {fileID: 21300000, guid: eebb1eca2d6b9c446b423b4441799a6c, type: 3}
     accessoryButton: {fileID: 856349077}
@@ -2126,7 +2126,7 @@ MonoBehaviour:
       offset: {x: -119, y: 22.6}
       scale: {x: 0.52, y: 0.52}
       rotation: 0
-  - accessoryId: StarfishGlasses
+  - accessoryId: glasses_starfish
     displayName: StarfishGlasses
     accessorySprite: {fileID: 21300000, guid: 6540db152f34d714eac9ac9c042858fb, type: 3}
     accessoryButton: {fileID: 2027900067}
@@ -2739,7 +2739,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1042104290}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -3782,7 +3782,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1456601087}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -3959,6 +3959,7 @@ GameObject:
   - component: {fileID: 1541542965}
   - component: {fileID: 1541542964}
   - component: {fileID: 1541542963}
+  - component: {fileID: 1541542966}
   m_Layer: 5
   m_Name: Fish
   m_TagString: Untagged
@@ -4007,7 +4008,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1541542961}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -4038,6 +4039,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1541542961}
   m_CullTransparentMesh: 1
+--- !u!114 &1541542966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541542961}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d61e6f5aafd1e44480d5bd46dffce50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fish3DView
+  fish3DPrefab: {fileID: 1088935307352523980, guid: 1154c4eec53853941bb50c221891e2ff, type: 3}
+  hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
+  glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
+  baseWorldDepthFromCamera: 103.3
+  scaleMultiplier: 1.45
+  referenceCameraOrthoSize: 81.42
+  turnSmoothTime: 0.26
+  maxPitchAngle: 20
+  pitchSmoothSpeed: 6
+  swimYawSwayAmplitude: 3.5
+  swimYawSwayFrequency: 3.2
+  minAnimatorSpeed: 0.65
+  maxAnimatorSpeed: 1.5
 --- !u!1 &1542222328
 GameObject:
   m_ObjectHideFlags: 0
@@ -4165,6 +4191,63 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1001 &1583987769
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7645682585692448374, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
+      propertyPath: m_Name
+      value: PrototypeEnvironment
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
 --- !u!1 &1634096868
 GameObject:
   m_ObjectHideFlags: 0
@@ -4843,7 +4926,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &2025757226
 AudioListener:
   m_ObjectHideFlags: 0
@@ -5244,3 +5327,4 @@ SceneRoots:
   - {fileID: 801394503}
   - {fileID: 1267438143}
   - {fileID: 847962240}
+  - {fileID: 1583987769}
