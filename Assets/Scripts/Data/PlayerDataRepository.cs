@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Endowment.Network;
 
 /// <summary>
 /// Result of a purchase attempt.
@@ -197,44 +199,140 @@ public static class PlayerDataRepository
         return playerFish;
     }
 
+    /// <summary>
+    /// Synchronizes the local playerFish state from GET /api/v1/me/aquarium when a Bearer token is configured.
+    /// Safe to call on scene load; invokes onSynced if remote fish data was loaded.
+    /// </summary>
+    public static void SyncFromBackend(Action onSynced = null)
+    {
+        EnsureInitialized();
+
+        if (!BackendApiClient.Instance.HasBearerToken)
+        {
+            onSynced?.Invoke();
+            return;
+        }
+
+        BackendApiClient.Instance.GetPersonalAquarium((aquarium, error) =>
+        {
+            if (aquarium != null && aquarium.fish != null && aquarium.fish.Count > 0)
+            {
+                PersonalFishDTO remoteFish = aquarium.fish.Find(f => f.state != null && f.state.isActive)
+                                             ?? aquarium.fish[0];
+
+                if (remoteFish != null)
+                {
+                    playerFish.fishId = remoteFish.id;
+                    if (!string.IsNullOrEmpty(remoteFish.speciesCode))
+                        playerFish.species = remoteFish.speciesCode;
+                    if (!string.IsNullOrEmpty(remoteFish.tierCode))
+                        playerFish.tier = BackendContractMapper.ToClientTier(remoteFish.tierCode);
+
+                    if (remoteFish.appearance != null)
+                    {
+                        if (!string.IsNullOrEmpty(remoteFish.appearance.colorCode))
+                            playerFish.colorVariant = BackendContractMapper.ToClientColorVariant(remoteFish.appearance.colorCode);
+
+                        string mappedAcc = BackendContractMapper.ToClientAccessoryId(remoteFish.appearance.accessoryCode);
+                        if (!string.IsNullOrEmpty(mappedAcc) || string.IsNullOrEmpty(playerFish.selectedAccessoryId))
+                        {
+                            playerFish.selectedAccessoryId = mappedAcc;
+                        }
+                    }
+
+                    Save();
+                    Debug.Log($"[PlayerDataRepository] Synced personal fish from backend (id={playerFish.fishId}, tier={playerFish.tier}, color={playerFish.colorVariant}).");
+                }
+            }
+
+            onSynced?.Invoke();
+        });
+    }
+
     // ───────────────────────────── Fish Mutations ─────────────────────────────
 
     /// <summary>
-    /// Saves the selected color variant for the player's fish.
-    /// Future: PATCH /api/v1/me/fish/:fishId/appearance { colorCode: "BLUE" }
+    /// Saves the selected color variant for the player's fish and syncs via PATCH /api/v1/me/fish/:fishId/appearance.
     /// </summary>
     public static void SaveFishColor(string colorVariant)
     {
         EnsureInitialized();
         playerFish.colorVariant = colorVariant;
         Save();
+
+        BackendApiClient.Instance.UpdateFishAppearance(
+            playerFish.fishId,
+            playerFish.colorVariant,
+            playerFish.selectedAccessoryId,
+            (updatedFish, err) =>
+            {
+                if (updatedFish != null)
+                {
+                    Debug.Log($"[PlayerDataRepository] Backend color synced: {updatedFish.appearance?.colorCode}");
+                }
+            });
     }
 
     /// <summary>
-    /// Saves the selected accessory for the player's fish. Pass null or empty to unequip.
-    /// Future: PATCH /api/v1/me/fish/:fishId/appearance { accessoryCode: "HAT_CROWN" }
+    /// Saves the selected accessory for the player's fish and syncs via PATCH /api/v1/me/fish/:fishId/appearance.
+    /// Pass null or empty to unequip.
     /// </summary>
     public static void SaveSelectedAccessory(string accessoryId)
     {
         EnsureInitialized();
         playerFish.selectedAccessoryId = accessoryId;
         Save();
+
+        BackendApiClient.Instance.UpdateFishAppearance(
+            playerFish.fishId,
+            playerFish.colorVariant,
+            playerFish.selectedAccessoryId,
+            (updatedFish, err) =>
+            {
+                if (updatedFish != null)
+                {
+                    Debug.Log($"[PlayerDataRepository] Backend accessory synced: {updatedFish.appearance?.accessoryCode}");
+                }
+            });
     }
 
     /// <summary>
     /// Simulates a donation resulting in a new fish of the specified tier.
-    /// Replaces the current fish for LoFi testing purposes.
-    /// Future: POST /api/v1/donations -> Wait for webhook -> GET /api/v1/me/fish
+    /// Triggers a mock donation for the current donor on the Mock Endowment API (:4000),
+    /// which generates the fish with the matching tierCode in the database.
     /// </summary>
-    public static void SimulateDonation(string tier)
+    public static void SimulateDonation(string tier, Action onComplete = null)
     {
         EnsureInitialized();
         playerFish.tier = tier;
-        
-        // Optionally reset accessory or let it persist
-        // playerFish.selectedAccessoryId = null;
-
         Save();
+
+        string preservedColor = playerFish.colorVariant;
+        string preservedAccessory = playerFish.selectedAccessoryId;
+
+        BackendApiClient.Instance.SimulateTierDonation(tier, (success, result) =>
+        {
+            if (success)
+            {
+                // Refresh personal aquarium from backend to get the newly created fish & its ID
+                SyncFromBackend(() =>
+                {
+                    // Re-apply the current color and accessory so the new fish retains customizations
+                    BackendApiClient.Instance.UpdateFishAppearance(
+                        playerFish.fishId,
+                        preservedColor,
+                        preservedAccessory,
+                        (updatedFish, err) =>
+                        {
+                            onComplete?.Invoke();
+                        });
+                });
+            }
+            else
+            {
+                onComplete?.Invoke();
+            }
+        });
     }
 
     // ───────────────────────────── Accessory Queries ─────────────────────────────

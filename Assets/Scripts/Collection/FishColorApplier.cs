@@ -82,6 +82,13 @@ public class FishColorApplier : MonoBehaviour
     private void Start()
     {
         ApplyCustomization();
+        PlayerDataRepository.SyncFromBackend(() =>
+        {
+            if (this != null && isActiveAndEnabled)
+            {
+                ApplyCustomization();
+            }
+        });
     }
 
     /// <summary>

@@ -63,11 +63,17 @@ public class AquariumFish : MonoBehaviour
     {
         movementScript = GetComponent<FishMovement>();
 
-        // 1. Set text (Tier disembunyikan sementara, hanya menampilkan nama pemilik)
+        // 1. Set text (Tampilkan nama pemilik dan tier)
         if (ownerNameText != null)
         {
-            // ownerNameText.text = $"{ownerName}\n<size=70%>({fishRarity})</size>";
-            ownerNameText.text = ownerName;
+            if (!string.IsNullOrEmpty(fishRarity))
+            {
+                ownerNameText.text = $"{ownerName}\n<size=75%><color=#8EE5FF>({fishRarity})</color></size>";
+            }
+            else
+            {
+                ownerNameText.text = ownerName;
+            }
         }
 
         // 2. Apply Custom Sprite & Size based on Rarity Configs

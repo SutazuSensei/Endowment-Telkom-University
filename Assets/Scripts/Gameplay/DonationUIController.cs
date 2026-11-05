@@ -80,17 +80,20 @@ public class DonationUIController : MonoBehaviour
 
     private void SimulateDonation(string tier)
     {
-        // 1. Update data in the repository (LoFi overwrite behavior)
-        PlayerDataRepository.SimulateDonation(tier);
+        // 1. Update data in the repository and trigger backend mock donation for active donor
+        PlayerDataRepository.SimulateDonation(tier, () =>
+        {
+            if (fishColorApplier != null)
+            {
+                fishColorApplier.ApplyCustomization();
+            }
+            UpdateDonationAmountText();
+        });
 
-        // 2. Refresh the fish visual immediately
+        // 2. Refresh the fish visual immediately for instant client feedback
         if (fishColorApplier != null)
         {
             fishColorApplier.ApplyCustomization();
-        }
-        else
-        {
-            Debug.LogWarning("[DonationUIController] FishColorApplier not found. Visual won't update until next load.");
         }
 
         UpdateDonationAmountText();

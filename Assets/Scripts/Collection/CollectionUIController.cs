@@ -112,6 +112,15 @@ public class CollectionUIController : MonoBehaviour
 
         // 2. Load and display initial fish state from Repository
         RefreshShowcase();
+
+        // 3. Sync with Backend API if authenticated
+        PlayerDataRepository.SyncFromBackend(() =>
+        {
+            if (this != null && isActiveAndEnabled)
+            {
+                RefreshShowcase();
+            }
+        });
     }
 
     private void SetupListeners()

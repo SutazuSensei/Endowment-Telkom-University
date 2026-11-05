@@ -240,15 +240,18 @@ public class Fish3DView : MonoBehaviour
         if (!string.IsNullOrEmpty(currentAccessoryId))
         {
             string idLower = currentAccessoryId.ToLowerInvariant();
-            if (idLower.Contains("hat"))
+            if (idLower != "none")
             {
-                showHat = true;
-                ApplyHatVariantStyle(idLower);
-            }
-            else if (idLower.Contains("glass") || idLower.Contains("starfish"))
-            {
-                showGlasses = true;
-                ApplyGlassesVariantStyle(idLower);
+                if (idLower.Contains("hat") || idLower.Contains("cap"))
+                {
+                    showHat = true;
+                    ApplyHatVariantStyle(idLower);
+                }
+                else if (idLower.Contains("glass") || idLower.Contains("starfish"))
+                {
+                    showGlasses = true;
+                    ApplyGlassesVariantStyle(idLower);
+                }
             }
         }
 
@@ -267,6 +270,18 @@ public class Fish3DView : MonoBehaviour
         {
             crownColor = new Color(0.48f, 0.28f, 0.12f, 1f);
             ribbonColor = new Color(0.92f, 0.72f, 0.20f, 1f);
+        }
+        else if (idLower.Contains("telu"))
+        {
+            // Telkom University Crimson Red & Pure White
+            crownColor = new Color(0.82f, 0.12f, 0.16f, 1f);
+            ribbonColor = new Color(0.96f, 0.96f, 0.98f, 1f);
+        }
+        else if (idLower.Contains("graduation"))
+        {
+            // Academic Black & Gold Tassel Ribbon
+            crownColor = new Color(0.10f, 0.10f, 0.13f, 1f);
+            ribbonColor = new Color(0.95f, 0.78f, 0.18f, 1f);
         }
         else if (idLower.Contains("sailor"))
         {
@@ -325,10 +340,14 @@ public class Fish3DView : MonoBehaviour
         switch (variant.Trim().ToLowerInvariant())
         {
             case "red":
+            case "coral_pink":
                 return new Color(0.92f, 0.20f, 0.20f, 1f);
             case "blue":
+            case "default":
+            case "ocean_blue":
                 return new Color(0.15f, 0.45f, 0.95f, 1f);
             case "yellow":
+            case "golden":
                 return new Color(0.95f, 0.80f, 0.12f, 1f);
             case "green":
                 return new Color(0.18f, 0.82f, 0.35f, 1f);
