@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Endowment.Gameplay;
 
 /// <summary>
-/// Renders and animates the 3D Fish model (Blue Powder Tang) + 3D Accessories (Top Hat, Glasses)
+/// Renders and animates the 3D Fish model (Blue Powder Tang or Procedural Nemo) + 3D Accessories (Top Hat, Glasses)
 /// synchronized to this UI RectTransform's screen position.
 /// Bridges the LoFi 2D RectTransform gameplay systems (FishMovement, ShowcaseFishBob, Food, OwnerName)
 /// with the Prototype's 3D SkinnedMeshRenderer, Animator, fishmask shader, and CameraZoomTransition.
@@ -32,6 +33,9 @@ public class Fish3DView : MonoBehaviour
     private Transform modelTransform;
     private Animator fishAnimator;
     private SkinnedMeshRenderer fishRenderer;
+    private MeshRenderer staticMeshRenderer;
+    private ProceduralFishAnimator proceduralAnimator;
+    private ModularFishAnimator modularAnimator;
     private Transform hatSocket;
     private Transform glassesSocket;
 
@@ -120,6 +124,20 @@ public class Fish3DView : MonoBehaviour
         scaleMultiplier = multiplier;
     }
 
+    public void SetFishModelPrefab(GameObject newPrefab)
+    {
+        if (newPrefab == null || fish3DPrefab == newPrefab) return;
+
+        fish3DPrefab = newPrefab;
+        if (fish3DInstance != null)
+        {
+            Destroy(fish3DInstance);
+            fish3DInstance = null;
+        }
+        Ensure3DInstance();
+        ApplyVisualState();
+    }
+
     public void ApplyCustomization(string tier, string colorVariant, string accessoryId)
     {
         if (!string.IsNullOrEmpty(tier)) currentTier = tier;
@@ -183,6 +201,9 @@ public class Fish3DView : MonoBehaviour
 
         fishAnimator = fish3DInstance.GetComponentInChildren<Animator>();
         fishRenderer = fish3DInstance.GetComponentInChildren<SkinnedMeshRenderer>();
+        staticMeshRenderer = fish3DInstance.GetComponentInChildren<MeshRenderer>();
+        proceduralAnimator = fish3DInstance.GetComponentInChildren<ProceduralFishAnimator>();
+        modularAnimator = fish3DInstance.GetComponentInChildren<ModularFishAnimator>();
 
         if (fishAnimator != null)
         {
@@ -191,13 +212,16 @@ public class Fish3DView : MonoBehaviour
             fishAnimator.Play(0, 0, Random.value);
         }
 
-        // Locate sockets on Head bone
+        // Locate sockets on Head bone or procedural animator
         Transform[] allTransforms = fish3DInstance.GetComponentsInChildren<Transform>(true);
         foreach (Transform t in allTransforms)
         {
             if (t.name == "HatSocket") hatSocket = t;
             else if (t.name == "GlassesSocket") glassesSocket = t;
         }
+
+        if (hatSocket == null && proceduralAnimator != null) hatSocket = proceduralAnimator.HatSocket;
+        if (glassesSocket == null && proceduralAnimator != null) glassesSocket = proceduralAnimator.GlassesSocket;
 
         if (hatSocket != null && hat3DPrefab != null)
         {
@@ -224,13 +248,17 @@ public class Fish3DView : MonoBehaviour
     {
         if (fish3DInstance == null) return;
 
-        // 1. Apply Shader Color (_FishColor) via MaterialPropertyBlock
-        if (fishRenderer != null)
+        // 1. Apply Shader Color (_FishColor / _BaseColor) via MaterialPropertyBlock
+        Color targetColor = ResolveFishColor(currentColorVariant);
+        Renderer[] allRenderers = fish3DInstance.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer r in allRenderers)
         {
-            Color targetColor = ResolveFishColor(currentColorVariant);
-            fishRenderer.GetPropertyBlock(fishPropBlock);
+            if (hatSocket != null && r.transform.IsChildOf(hatSocket)) continue;
+            if (glassesSocket != null && r.transform.IsChildOf(glassesSocket)) continue;
+            r.GetPropertyBlock(fishPropBlock);
             fishPropBlock.SetColor(FishColorID, targetColor);
-            fishRenderer.SetPropertyBlock(fishPropBlock);
+            fishPropBlock.SetColor(BaseColorID, targetColor);
+            r.SetPropertyBlock(fishPropBlock);
         }
 
         // 2. Apply 3D Accessory (Top Hat or Glasses) attached to Head bone socket
@@ -459,10 +487,19 @@ public class Fish3DView : MonoBehaviour
 
         fish3DInstance.transform.rotation = Quaternion.Euler(currentPitch, currentYaw + sway, currentRoll);
 
-        // 4. Sync Animator tail speed to swimming speed
+        // 4. Sync Animator / Procedural tail speed to swimming speed
+        float calculatedSpeed = Mathf.Lerp(minAnimatorSpeed, maxAnimatorSpeed, speedRatio);
         if (fishAnimator != null)
         {
-            fishAnimator.speed = Mathf.Lerp(minAnimatorSpeed, maxAnimatorSpeed, speedRatio);
+            fishAnimator.speed = calculatedSpeed;
+        }
+        if (proceduralAnimator != null)
+        {
+            proceduralAnimator.SetSpeedMultiplier(calculatedSpeed);
+        }
+        if (modularAnimator != null)
+        {
+            modularAnimator.SetSpeedMultiplier(calculatedSpeed);
         }
     }
 }

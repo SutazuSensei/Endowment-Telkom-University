@@ -904,7 +904,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d61e6f5aafd1e44480d5bd46dffce50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fish3DView
-  fish3DPrefab: {fileID: 1088935307352523980, guid: 1154c4eec53853941bb50c221891e2ff, type: 3}
+  fish3DPrefab: {fileID: 6624523024865215139, guid: dbd6d5d8e98a2c34fbb2552eb35956cd, type: 3}
   hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
   glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
   baseWorldDepthFromCamera: 103.3
@@ -4679,6 +4679,8 @@ MonoBehaviour:
   foodPrefab: {fileID: 4426525846773731451, guid: 255adb5f0c14b2443bce3c022b0037cc, type: 3}
   aquariumArea: {fileID: 659389966}
   feedButton: {fileID: 1787162650}
+  cooldownStatusText: {fileID: 0}
+  enforceServerCooldown: 1
 --- !u!4 &1552968794
 Transform:
   m_ObjectHideFlags: 0
@@ -6015,6 +6017,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BigAquariumManager
   fishPrefab: {fileID: 9138026842888442259, guid: e79383e39d11c5c4b839e2faee657df9, type: 3}
   aquariumArea: {fileID: 2014634380}
+  maxFishLimit: 15
+  padWithDummyIfUnderMinimum: 0
   dummyJson: "[\r\n  {\r\n    \"name\":\"Andi\",\r\n    \"fish\":[{\"tier\":\"Common\",
     \"colorVariant\":\"red\"}]\r\n  },\r\n  {\r\n    \"name\":\"Siti\",\r\n    \"fish\":[{\"tier\":\"Common\",
     \"colorVariant\":\"blue\"}]\r\n  },\r\n  {\r\n    \"name\":\"Budi\",\r\n    \"fish\":[{\"tier\":\"Epic\",
