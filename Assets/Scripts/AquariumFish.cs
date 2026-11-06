@@ -46,6 +46,12 @@ public class AquariumFish : MonoBehaviour
 
     private FishMovement movementScript;
 
+    public string OwnerName { get; private set; } = "";
+    public string FishRarity { get; private set; } = "Common";
+    public string ColorVariant { get; private set; } = "blue";
+    public string AccessoryId { get; private set; } = "";
+    public bool IsCurrentPlayerFish { get; set; } = false;
+
     private void Update()
     {
         if (ownerNameText != null)
@@ -63,30 +69,44 @@ public class AquariumFish : MonoBehaviour
     {
         movementScript = GetComponent<FishMovement>();
 
+        OwnerName = !string.IsNullOrEmpty(ownerName) ? ownerName : "Anonymous Donor";
+        FishRarity = !string.IsNullOrEmpty(fishRarity) ? fishRarity : "Common";
+        ColorVariant = !string.IsNullOrEmpty(colorVariant) ? colorVariant : "blue";
+        AccessoryId = accessoryId ?? "";
+
         // 1. Set text (Tampilkan nama pemilik dan tier)
         if (ownerNameText != null)
         {
-            if (!string.IsNullOrEmpty(fishRarity))
+            if (!string.IsNullOrEmpty(FishRarity))
             {
-                ownerNameText.text = $"{ownerName}\n<size=75%><color=#8EE5FF>({fishRarity})</color></size>";
+                ownerNameText.text = $"{OwnerName}\n<size=75%><color=#8EE5FF>({FishRarity})</color></size>";
             }
             else
             {
-                ownerNameText.text = ownerName;
+                ownerNameText.text = OwnerName;
             }
         }
 
         // 2. Apply Custom Sprite & Size based on Rarity Configs
-        ApplyRarityConfig(fishRarity, colorVariant);
+        ApplyRarityConfig(FishRarity, ColorVariant);
 
         // 3. Apply Accessory if provided
-        ApplyAccessory(accessoryId, fishRarity);
+        ApplyAccessory(AccessoryId, FishRarity);
         Fish3DView view3D = GetComponent<Fish3DView>();
-        if (view3D != null) view3D.ApplyCustomization(fishRarity, colorVariant, accessoryId);
+        if (view3D != null) view3D.ApplyCustomization(FishRarity, ColorVariant, AccessoryId);
+    }
+
+    public void SetOwnerNameVisible(bool visible)
+    {
+        if (ownerNameText != null)
+        {
+            ownerNameText.gameObject.SetActive(visible);
+        }
     }
 
     private void ApplyRarityConfig(string rarity, string colorVariant)
     {
+        if (rarityConfigs == null) return;
         bool foundFallback = false;
 
         foreach (var config in rarityConfigs)

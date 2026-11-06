@@ -28,13 +28,26 @@ public class AquariumDataWrapper
 }
 
 /// <summary>
-/// Manages the Big Aquarium exhibition mode.
-/// Fetches live public donor fish from GET /api/v1/big-aquarium?limit=15,
-/// automatically refreshes every 60 seconds (or server-specified refreshAfterSeconds),
-/// and gracefully falls back to local dummy JSON if the backend server is offline.
+/// Manages the Big Aquarium exhibition mode:
+/// - Always maintains exactly 15 fish in the aquarium:
+///   * 1 Current Player Fish (permanent, NEVER rotated out).
+///   * 14 Random Donor Fish (periodically rotated a few at a time).
+/// - When rotating fish, outgoing fish swim out past the aquarium boundary collider,
+///   and incoming replacement fish spawn outside the boundary and swim in naturally.
+/// - Provides search lookup by donor name for BigAquariumSearchController.
 /// </summary>
 public class BigAquariumManager : MonoBehaviour
 {
+    [Serializable]
+    public class DonorFishProfile
+    {
+        public string id;
+        public string ownerName;
+        public string tier;
+        public string colorVariant;
+        public string accessoryId;
+    }
+
     [Header("UI & Prefab References")]
     [Tooltip("Prefab Ikan UI yang memiliki komponen AquariumFish dan FishMovement")]
     public GameObject fishPrefab;
@@ -42,13 +55,25 @@ public class BigAquariumManager : MonoBehaviour
     [Tooltip("Panel UI RectTransform tempat ikan berenang (Big Aquarium Area)")]
     public RectTransform aquariumArea;
 
-    [Header("Backend Exhibition Settings")]
-    [Tooltip("Maksimal jumlah ikan yang diminta dari endpoint /api/v1/big-aquarium (1 - 50)")]
-    [Range(1, 50)]
+    [Header("Population Rules (1 Player + 14 Random = 15 Total)")]
+    [Tooltip("Total maksimal ikan di Big Aquarium (1 ikan player + 14 ikan random).")]
+    [Range(2, 50)]
     public int maxFishLimit = 15;
 
-    [Tooltip("Jika aktif, tambahkan ikan dummy lokal apabila jumlah ikan dari server kurang dari target minimum.")]
-    public bool padWithDummyIfUnderMinimum = false;
+    [Tooltip("Nama default untuk ikan Current Player jika nama dari BackendApiClient kosong.")]
+    public string currentPlayerDefaultName = "Pandu (Tel-U)";
+
+    [Header("Partial Rotation Settings")]
+    [Tooltip("Interval waktu (detik) untuk merotasi sebagian ikan random.")]
+    [Range(15f, 300f)]
+    public float rotationIntervalSeconds = 90f;
+
+    [Tooltip("Jumlah ikan random yang digantikan setiap siklus rotasi (jangan semua sekaligus).")]
+    [Range(1, 6)]
+    public int fishRotatedPerCycle = 3;
+
+    [Tooltip("Jika aktif, tambahkan ikan dummy lokal apabila jumlah ikan dari server kurang dari target.")]
+    public bool padWithDummyIfUnderMinimum = true;
 
     [Header("Offline Fallback / Dummy JSON Data")]
     [TextArea(10, 15)]
@@ -67,82 +92,428 @@ public class BigAquariumManager : MonoBehaviour
   }
 ]";
 
-    private readonly Dictionary<string, AquariumFish> activeServerFishById = new Dictionary<string, AquariumFish>();
-    private readonly List<GameObject> spawnedFallbackFish = new List<GameObject>();
-    private Coroutine refreshLoopCoroutine;
-    private float currentRefreshInterval = 60f;
+    private AquariumFish currentPlayerFish;
+    private readonly List<AquariumFish> activeRandomFish = new List<AquariumFish>();
+    private readonly List<DonorFishProfile> donorCandidatePool = new List<DonorFishProfile>();
 
-    private void Start()
+    private Coroutine syncLoopCoroutine;
+    private Coroutine rotationLoopCoroutine;
+    private int poolRotationCursor = 0;
+
+    public AquariumFish CurrentPlayerFish => currentPlayerFish;
+    public IReadOnlyList<AquariumFish> ActiveRandomFish => activeRandomFish;
+
+    private void OnEnable()
     {
-        refreshLoopCoroutine = StartCoroutine(ExhibitionRefreshLoop());
+        InitializePopulationAndLoops();
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (refreshLoopCoroutine != null)
+        if (syncLoopCoroutine != null)
         {
-            StopCoroutine(refreshLoopCoroutine);
+            StopCoroutine(syncLoopCoroutine);
+            syncLoopCoroutine = null;
+        }
+        if (rotationLoopCoroutine != null)
+        {
+            StopCoroutine(rotationLoopCoroutine);
+            rotationLoopCoroutine = null;
+        }
+    }
+
+    private void InitializePopulationAndLoops()
+    {
+        if (fishPrefab == null || aquariumArea == null)
+        {
+            Debug.LogError("[BigAquariumManager] FishPrefab atau AquariumArea belum di-assign di Inspector!");
+            return;
+        }
+
+        // 1. Build fallback candidate pool so we always have >= 28 unique donors available for rotation
+        BuildDefaultCandidatePool();
+
+        // 2. Spawn or update the 1 Permanent Current Player Fish
+        EnsureCurrentPlayerFish();
+
+        // 3. Spawn initial 14 random fish inside the aquarium if not yet populated
+        activeRandomFish.RemoveAll(f => f == null);
+        int targetRandomCount = Mathf.Max(1, maxFishLimit - 1);
+        while (activeRandomFish.Count < targetRandomCount)
+        {
+            DonorFishProfile profile = GetNextUnusedCandidate();
+            AquariumFish spawned = SpawnFishInsideAquarium(profile, false);
+            if (spawned != null)
+            {
+                activeRandomFish.Add(spawned);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        // 4. Start backend sync & partial rotation coroutines
+        if (syncLoopCoroutine != null) StopCoroutine(syncLoopCoroutine);
+        syncLoopCoroutine = StartCoroutine(BackendSyncLoop());
+
+        if (rotationLoopCoroutine != null) StopCoroutine(rotationLoopCoroutine);
+        rotationLoopCoroutine = StartCoroutine(PartialRotationLoop());
+    }
+
+    /// <summary>
+    /// Dapat dipanggil dari UI atau Inspector untuk memaksa refresh data server sekarang juga.
+    /// </summary>
+    public void RefreshNow()
+    {
+        FetchDonorPoolFromBackend();
+    }
+
+    /// <summary>
+    /// Dapat dipanggil dari Inspector Context Menu untuk mengetes rotasi sebagian ikan secara langsung.
+    /// </summary>
+    [ContextMenu("Trigger Partial Rotation Now")]
+    public void TriggerPartialRotationNow()
+    {
+        RotateSomeFish(fishRotatedPerCycle);
+    }
+
+    // ───────────────────────────── 1. Current Player Fish (Never Rotated) ─────────────────────────────
+
+    public void EnsureCurrentPlayerFish()
+    {
+        FishData playerFishData = PlayerDataRepository.GetPlayerFish();
+        string playerName = BackendApiClient.Instance != null && !string.IsNullOrEmpty(BackendApiClient.Instance.DonorDisplayName)
+            ? BackendApiClient.Instance.DonorDisplayName
+            : currentPlayerDefaultName;
+
+        string tier = playerFishData != null && !string.IsNullOrEmpty(playerFishData.tier) ? playerFishData.tier : "Common";
+        string color = playerFishData != null && !string.IsNullOrEmpty(playerFishData.colorVariant) ? playerFishData.colorVariant : "red";
+        string accessory = playerFishData != null ? (playerFishData.selectedAccessoryId ?? "") : "";
+
+        if (currentPlayerFish == null)
+        {
+            DonorFishProfile playerProfile = new DonorFishProfile
+            {
+                id = "current_player_fish",
+                ownerName = playerName,
+                tier = tier,
+                colorVariant = color,
+                accessoryId = accessory
+            };
+
+            currentPlayerFish = SpawnFishInsideAquarium(playerProfile, true);
+            if (currentPlayerFish != null)
+            {
+                currentPlayerFish.gameObject.name = $"Fish_CurrentPlayer_{playerName}";
+            }
+        }
+        else
+        {
+            currentPlayerFish.IsCurrentPlayerFish = true;
+            currentPlayerFish.SetupFish(playerName, tier, color, accessory);
+        }
+
+        // Also sync from backend if token is present so tier/color updates reflect
+        PlayerDataRepository.SyncFromBackend(() =>
+        {
+            if (currentPlayerFish != null)
+            {
+                FishData synced = PlayerDataRepository.GetPlayerFish();
+                currentPlayerFish.SetupFish(playerName, synced.tier, synced.colorVariant, synced.selectedAccessoryId ?? "");
+            }
+        });
+    }
+
+    // ───────────────────────────── 2. Partial Fish Rotation (Swim Out & Swim In) ─────────────────────────────
+
+    private IEnumerator PartialRotationLoop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(Mathf.Max(10f, rotationIntervalSeconds));
+            RotateSomeFish(fishRotatedPerCycle);
         }
     }
 
     /// <summary>
-    /// Dapat dipanggil dari UI atau script lain untuk memaksa refresh data Big Aquarium sekarang juga.
+    /// Replaces a small subset of activeRandomFish (never touching currentPlayerFish or the currently inspected fish).
+    /// Outgoing fish swim out beyond the boundary collider; replacement fish swim in from outside the boundary collider.
     /// </summary>
-    public void RefreshNow()
+    public void RotateSomeFish(int countToRotate)
     {
-        FetchBigAquariumFromBackend();
-    }
+        activeRandomFish.RemoveAll(f => f == null);
+        if (activeRandomFish.Count == 0) return;
 
-    private IEnumerator ExhibitionRefreshLoop()
-    {
-        while (true)
+        // Collect eligible random fish (exclude current player fish, inspected fish, and already exiting fish)
+        List<AquariumFish> eligible = new List<AquariumFish>();
+        foreach (AquariumFish fish in activeRandomFish)
         {
-            bool requestDone = false;
-            FetchBigAquariumFromBackend(() => requestDone = true);
+            if (fish == null || fish.IsCurrentPlayerFish) continue;
+            FishMovement mov = fish.GetComponent<FishMovement>();
+            if (mov != null && (mov == FishMovement.InspectedFish || mov.IsExiting || mov.IsEntering))
+                continue;
 
-            while (!requestDone)
-            {
-                yield return null;
-            }
-
-            yield return new WaitForSeconds(Mathf.Max(10f, currentRefreshInterval));
+            eligible.Add(fish);
         }
-    }
 
-    private void FetchBigAquariumFromBackend(Action onFinished = null)
-    {
-        BackendApiClient.Instance.GetBigAquarium(maxFishLimit, (data, error) =>
+        if (eligible.Count == 0) return;
+
+        int actualRotateCount = Mathf.Min(countToRotate, eligible.Count);
+
+        for (int i = 0; i < actualRotateCount; i++)
         {
-            if (data != null && data.fish != null)
+            int pickIdx = UnityEngine.Random.Range(0, eligible.Count);
+            AquariumFish outgoingFish = eligible[pickIdx];
+            eligible.RemoveAt(pickIdx);
+
+            // Remove from active list and command it to swim out past the collider
+            activeRandomFish.Remove(outgoingFish);
+            FishMovement outMov = outgoingFish.GetComponent<FishMovement>();
+            if (outMov != null)
             {
-                if (data.refreshAfterSeconds > 0)
-                {
-                    currentRefreshInterval = data.refreshAfterSeconds;
-                }
-
-                ClearFallbackFish();
-                SyncServerFish(data.fish);
-
-                if (padWithDummyIfUnderMinimum && data.fish.Count < 15)
-                {
-                    List<PlayerFishData> extra = new List<PlayerFishData>();
-                    EnsureMinimumFishCount(extra, 15 - data.fish.Count);
-                    SpawnAllFish(extra);
-                }
-
-                Debug.Log($"[BigAquariumManager] Live sync sukses ({data.fish.Count} ikan aktif, cursor={data.syncCursor}, refresh={currentRefreshInterval}s).");
+                outMov.SwimOutAndDestroy();
             }
             else
             {
-                // Offline fallback: jika belum ada ikan sama sekali di layar, gunakan data lokal
-                if (activeServerFishById.Count == 0 && spawnedFallbackFish.Count == 0)
-                {
-                    string reason = error != null ? $"{error.code}: {error.message}" : "Unknown";
-                    Debug.LogWarning($"[BigAquariumManager] Backend tidak terjangkau ({reason}). Menggunakan data fallback lokal.");
+                Destroy(outgoingFish.gameObject);
+            }
 
-                    List<PlayerFishData> playerList = LoadDataFromJSON();
-                    EnsureMinimumFishCount(playerList, 15);
-                    SpawnAllFish(playerList);
+            // Spawn a new replacement fish outside the boundary collider that swims into the aquarium
+            DonorFishProfile replacementProfile = GetNextUnusedCandidate();
+            AquariumFish incomingFish = SpawnFishEnteringFromOutside(replacementProfile);
+            if (incomingFish != null)
+            {
+                activeRandomFish.Add(incomingFish);
+            }
+        }
+
+        Debug.Log($"[BigAquariumManager] Rotasi bertahap: {actualRotateCount} ikan lama berenang keluar & {actualRotateCount} ikan baru berenang masuk. Ikan player tetap aman.");
+    }
+
+    // ───────────────────────────── 3. Search Lookup by Owner Name ─────────────────────────────
+
+    /// <summary>
+    /// Searches for a fish by owner name (case-insensitive).
+    /// Checks the 15 active fish in the aquarium first (Current Player + 14 Random).
+    /// If not currently in the tank but exists in the donor pool, rotates 1 fish out and swims the searched donor's fish in!
+    /// </summary>
+    public AquariumFish FindOrBringInFishByName(string searchName)
+    {
+        if (string.IsNullOrWhiteSpace(searchName)) return null;
+        string query = searchName.Trim();
+
+        activeRandomFish.RemoveAll(f => f == null);
+
+        // 1. Exact match among currently swimming fish (Current Player + 14 Random)
+        if (currentPlayerFish != null && MatchesNameExact(currentPlayerFish.OwnerName, query))
+        {
+            return currentPlayerFish;
+        }
+        foreach (AquariumFish fish in activeRandomFish)
+        {
+            if (fish != null && MatchesNameExact(fish.OwnerName, query))
+            {
+                return fish;
+            }
+        }
+
+        // 2. Partial (contains) match among currently swimming fish
+        if (currentPlayerFish != null && MatchesNamePartial(currentPlayerFish.OwnerName, query))
+        {
+            return currentPlayerFish;
+        }
+        foreach (AquariumFish fish in activeRandomFish)
+        {
+            if (fish != null && MatchesNamePartial(fish.OwnerName, query))
+            {
+                return fish;
+            }
+        }
+
+        // 3. Check if the donor exists in the candidate pool (currently rotated out)
+        DonorFishProfile poolMatch = donorCandidatePool.Find(p => MatchesNameExact(p.ownerName, query))
+                                     ?? donorCandidatePool.Find(p => MatchesNamePartial(p.ownerName, query));
+
+        if (poolMatch != null)
+        {
+            // Rotate 1 random fish out and bring the searched donor fish in from outside!
+            if (activeRandomFish.Count >= Mathf.Max(1, maxFishLimit - 1))
+            {
+                AquariumFish outgoing = activeRandomFish[0];
+                activeRandomFish.RemoveAt(0);
+                if (outgoing != null)
+                {
+                    FishMovement outMov = outgoing.GetComponent<FishMovement>();
+                    if (outMov != null) outMov.SwimOutAndDestroy();
+                    else Destroy(outgoing.gameObject);
+                }
+            }
+
+            AquariumFish broughtIn = SpawnFishEnteringFromOutside(poolMatch);
+            if (broughtIn != null)
+            {
+                activeRandomFish.Add(broughtIn);
+                return broughtIn;
+            }
+        }
+
+        return null;
+    }
+
+    private bool MatchesNameExact(string ownerName, string query)
+    {
+        if (string.IsNullOrEmpty(ownerName)) return false;
+        return string.Equals(ownerName.Trim(), query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool MatchesNamePartial(string ownerName, string query)
+    {
+        if (string.IsNullOrEmpty(ownerName)) return false;
+        return ownerName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    // ───────────────────────────── 4. Spawning Helpers (Inside vs Entering From Outside) ─────────────────────────────
+
+    private AquariumFish SpawnFishInsideAquarium(DonorFishProfile profile, bool isCurrentPlayer)
+    {
+        if (fishPrefab == null || aquariumArea == null || profile == null) return null;
+
+        Rect rect = aquariumArea.rect;
+        if (rect.width <= 10f) rect = new Rect(-910f, -460f, 1820f, 920f);
+
+        GameObject newFish = Instantiate(fishPrefab, aquariumArea);
+        newFish.name = $"Fish_{profile.ownerName}";
+        newFish.transform.SetAsLastSibling();
+
+        RectTransform fishRect = newFish.GetComponent<RectTransform>();
+        if (fishRect != null)
+        {
+            fishRect.localScale = Vector3.one;
+            float randomX = UnityEngine.Random.Range(rect.xMin + 120f, rect.xMax - 120f);
+            float randomY = UnityEngine.Random.Range(rect.yMin + 100f, rect.yMax - 100f);
+
+            fishRect.anchoredPosition = new Vector2(randomX, randomY);
+            fishRect.localPosition = new Vector3(fishRect.localPosition.x, fishRect.localPosition.y, 0f);
+        }
+
+        AquariumFish fishScript = newFish.GetComponent<AquariumFish>();
+        if (fishScript != null)
+        {
+            fishScript.IsCurrentPlayerFish = isCurrentPlayer;
+            fishScript.SetupFish(profile.ownerName, profile.tier, profile.colorVariant, profile.accessoryId);
+        }
+
+        return fishScript;
+    }
+
+    private AquariumFish SpawnFishEnteringFromOutside(DonorFishProfile profile)
+    {
+        if (fishPrefab == null || aquariumArea == null || profile == null) return null;
+
+        Rect rect = aquariumArea.rect;
+        if (rect.width <= 10f) rect = new Rect(-910f, -460f, 1820f, 920f);
+
+        GameObject newFish = Instantiate(fishPrefab, aquariumArea);
+        newFish.name = $"Fish_{profile.ownerName}";
+        newFish.transform.SetAsLastSibling();
+
+        // Spawn outside either the left or right collider boundary
+        bool enterFromLeft = UnityEngine.Random.value < 0.5f;
+        float outsideMargin = 320f;
+        float startX = enterFromLeft ? (rect.xMin - outsideMargin) : (rect.xMax + outsideMargin);
+        float startY = UnityEngine.Random.Range(rect.yMin + 120f, rect.yMax - 120f);
+        Vector2 outsideStartPos = new Vector2(startX, startY);
+
+        // Pick an entry target point well inside the aquarium
+        float insideX = enterFromLeft
+            ? UnityEngine.Random.Range(rect.xMin + 220f, rect.center.x)
+            : UnityEngine.Random.Range(rect.center.x, rect.xMax - 220f);
+        float insideY = Mathf.Clamp(startY + UnityEngine.Random.Range(-100f, 100f), rect.yMin + 120f, rect.yMax - 120f);
+        Vector2 insideTargetPos = new Vector2(insideX, insideY);
+
+        RectTransform fishRect = newFish.GetComponent<RectTransform>();
+        if (fishRect != null)
+        {
+            fishRect.localScale = Vector3.one;
+            fishRect.anchoredPosition = outsideStartPos;
+            fishRect.localPosition = new Vector3(outsideStartPos.x, outsideStartPos.y, 0f);
+        }
+
+        AquariumFish fishScript = newFish.GetComponent<AquariumFish>();
+        if (fishScript != null)
+        {
+            fishScript.IsCurrentPlayerFish = false;
+            fishScript.SetupFish(profile.ownerName, profile.tier, profile.colorVariant, profile.accessoryId);
+        }
+
+        FishMovement movement = newFish.GetComponent<FishMovement>();
+        if (movement != null)
+        {
+            movement.EnterFromOutside(outsideStartPos, insideTargetPos);
+        }
+
+        return fishScript;
+    }
+
+    // ───────────────────────────── 5. Backend Sync & Candidate Pool ─────────────────────────────
+
+    private IEnumerator BackendSyncLoop()
+    {
+        while (true)
+        {
+            bool done = false;
+            FetchDonorPoolFromBackend(() => done = true);
+            while (!done) yield return null;
+
+            yield return new WaitForSeconds(60f);
+        }
+    }
+
+    private void FetchDonorPoolFromBackend(Action onFinished = null)
+    {
+        EnsureCurrentPlayerFish();
+
+        BackendApiClient.Instance.GetBigAquarium(50, (data, error) =>
+        {
+            if (data != null && data.fish != null && data.fish.Count > 0)
+            {
+                string currentPlayerName = currentPlayerFish != null ? currentPlayerFish.OwnerName : currentPlayerDefaultName;
+
+                foreach (PublicFishDTO dto in data.fish)
+                {
+                    if (dto == null || string.IsNullOrEmpty(dto.id)) continue;
+                    string ownerName = !string.IsNullOrEmpty(dto.donorDisplayName) ? dto.donorDisplayName : "Anonymous Donor";
+
+                    // Skip current player so they are never duplicated in the random pool
+                    if (string.Equals(ownerName, currentPlayerName, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    string clientTier = BackendContractMapper.ToClientTier(dto.tierCode);
+                    string colorCode = dto.appearance != null ? dto.appearance.colorCode : "DEFAULT";
+                    string accessoryCode = dto.appearance != null ? dto.appearance.accessoryCode : "NONE";
+
+                    string clientColor = BackendContractMapper.ToClientColorVariant(colorCode);
+                    string clientAccessory = BackendContractMapper.ToClientAccessoryId(accessoryCode);
+
+                    DonorFishProfile existing = donorCandidatePool.Find(p => p.id == dto.id || string.Equals(p.ownerName, ownerName, StringComparison.OrdinalIgnoreCase));
+                    if (existing != null)
+                    {
+                        existing.tier = clientTier;
+                        existing.colorVariant = clientColor;
+                        existing.accessoryId = clientAccessory;
+                    }
+                    else
+                    {
+                        donorCandidatePool.Insert(0, new DonorFishProfile
+                        {
+                            id = dto.id,
+                            ownerName = ownerName,
+                            tier = clientTier,
+                            colorVariant = clientColor,
+                            accessoryId = clientAccessory
+                        });
+                    }
                 }
             }
 
@@ -150,108 +521,88 @@ public class BigAquariumManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Menyinkronkan daftar PublicFishDTO dari backend tanpa menghancurkan ikan yang masih aktif berenang.
-    /// Ikan baru di-spawn, ikan yang di-refund/dihapus di-despawn, dan ikan yang berganti warna/aksesoris di-update.
-    /// </summary>
-    private void SyncServerFish(List<PublicFishDTO> serverFishList)
+    private void BuildDefaultCandidatePool()
     {
-        if (fishPrefab == null || aquariumArea == null)
+        if (donorCandidatePool.Count > 0) return;
+
+        // Parse dummyJson first
+        List<PlayerFishData> fromJson = LoadDataFromJSON();
+        foreach (PlayerFishData p in fromJson)
         {
-            Debug.LogError("[BigAquariumManager] FishPrefab atau AquariumArea belum di-assign di Inspector!");
-            return;
+            if (p == null || string.IsNullOrEmpty(p.name) || p.fish == null || p.fish.Count == 0) continue;
+            BigAquariumFishData f = p.fish[0];
+            donorCandidatePool.Add(new DonorFishProfile
+            {
+                id = $"pool_{p.name.ToLowerInvariant()}",
+                ownerName = p.name,
+                tier = !string.IsNullOrEmpty(f.tier) ? f.tier : "Common",
+                colorVariant = !string.IsNullOrEmpty(f.colorVariant) ? f.colorVariant : "blue",
+                accessoryId = f.accessoryId ?? ""
+            });
         }
 
-        HashSet<string> incomingIds = new HashSet<string>();
+        // Add diverse donor names so rotation always has fresh donors outside the 14 active ones
+        string[] sampleNames = {
+            "Rudi", "Eka", "Dewi", "Fajar", "Gita", "Hana", "Irfan", "Joko",
+            "Kiki", "Lani", "Maya", "Nico", "Rian", "Sari", "Bayu", "Dina",
+            "Reza", "Tono", "Putri", "Agus", "Nadia", "Dimas", "Rizky", "Ayu", "Bagas"
+        };
+        string[] sampleRarities = { "Common", "Rare", "Epic", "Legendary" };
+        string[] sampleColors = { "red", "blue", "green", "yellow" };
+        string[] sampleAccessories = { "", "hat_bigtop", "hat_cowboy", "glasses_fancy", "glasses_redsand", "hat_sailor", "glasses_starfish", "" };
 
-        foreach (PublicFishDTO dto in serverFishList)
+        for (int i = 0; i < sampleNames.Length; i++)
         {
-            if (dto == null || string.IsNullOrEmpty(dto.id)) continue;
-            incomingIds.Add(dto.id);
+            string name = sampleNames[i];
+            if (donorCandidatePool.Exists(p => string.Equals(p.ownerName, name, StringComparison.OrdinalIgnoreCase)))
+                continue;
 
-            string ownerName = !string.IsNullOrEmpty(dto.donorDisplayName) ? dto.donorDisplayName : "Anonymous Donor";
-            string clientTier = BackendContractMapper.ToClientTier(dto.tierCode);
-            string colorCode = dto.appearance != null ? dto.appearance.colorCode : "DEFAULT";
-            string accessoryCode = dto.appearance != null ? dto.appearance.accessoryCode : "NONE";
-
-            string clientColor = BackendContractMapper.ToClientColorVariant(colorCode);
-            string clientAccessory = BackendContractMapper.ToClientAccessoryId(accessoryCode);
-
-            if (activeServerFishById.TryGetValue(dto.id, out AquariumFish existingFish) && existingFish != null)
+            donorCandidatePool.Add(new DonorFishProfile
             {
-                // Update tampilan ikan yang sudah ada tanpa mereset posisinya
-                existingFish.SetupFish(ownerName, clientTier, clientColor, clientAccessory);
-                Fish3DView view3D = existingFish.GetComponent<Fish3DView>();
-                if (view3D != null)
-                {
-                    view3D.ApplyCustomization(clientTier, colorCode, accessoryCode != "NONE" ? accessoryCode : clientAccessory);
-                }
-            }
-            else
-            {
-                // Spawn ikan baru dari server
-                GameObject newFishObj = SpawnSingleFishObject(ownerName, clientTier, clientColor, clientAccessory);
-                if (newFishObj != null)
-                {
-                    newFishObj.name = $"Fish_{ownerName}_{dto.id.Substring(0, Mathf.Min(6, dto.id.Length))}";
-                    AquariumFish fishComp = newFishObj.GetComponent<AquariumFish>();
-                    if (fishComp != null)
-                    {
-                        activeServerFishById[dto.id] = fishComp;
-                    }
-
-                    Fish3DView view3D = newFishObj.GetComponent<Fish3DView>();
-                    if (view3D != null)
-                    {
-                        view3D.ApplyCustomization(clientTier, colorCode, accessoryCode != "NONE" ? accessoryCode : clientAccessory);
-                    }
-                }
-            }
-        }
-
-        // Hapus ikan yang sudah tidak aktif (misalnya donasi di-refund)
-        List<string> toRemove = new List<string>();
-        foreach (var kvp in activeServerFishById)
-        {
-            if (!incomingIds.Contains(kvp.Key))
-            {
-                if (kvp.Value != null)
-                {
-                    Destroy(kvp.Value.gameObject);
-                }
-                toRemove.Add(kvp.Key);
-            }
-        }
-
-        foreach (string key in toRemove)
-        {
-            activeServerFishById.Remove(key);
+                id = $"pool_{name.ToLowerInvariant()}",
+                ownerName = name,
+                tier = sampleRarities[i % sampleRarities.Length],
+                colorVariant = sampleColors[i % sampleColors.Length],
+                accessoryId = sampleAccessories[i % sampleAccessories.Length]
+            });
         }
     }
 
-    private void ClearFallbackFish()
+    private DonorFishProfile GetNextUnusedCandidate()
     {
-        for (int i = spawnedFallbackFish.Count - 1; i >= 0; i--)
+        if (donorCandidatePool.Count == 0)
         {
-            if (spawnedFallbackFish[i] != null)
+            BuildDefaultCandidatePool();
+        }
+
+        // Try to pick a candidate from donorCandidatePool that is not currently swimming in activeRandomFish
+        for (int attempt = 0; attempt < donorCandidatePool.Count; attempt++)
+        {
+            int idx = (poolRotationCursor + attempt) % donorCandidatePool.Count;
+            DonorFishProfile candidate = donorCandidatePool[idx];
+
+            bool alreadySwimming = activeRandomFish.Exists(f =>
+                f != null && string.Equals(f.OwnerName, candidate.ownerName, StringComparison.OrdinalIgnoreCase));
+
+            if (!alreadySwimming)
             {
-                Destroy(spawnedFallbackFish[i]);
+                poolRotationCursor = (idx + 1) % donorCandidatePool.Count;
+                return candidate;
             }
         }
-        spawnedFallbackFish.Clear();
+
+        // Fallback if all pool candidates are already swimming
+        DonorFishProfile fallback = donorCandidatePool[poolRotationCursor % donorCandidatePool.Count];
+        poolRotationCursor = (poolRotationCursor + 1) % donorCandidatePool.Count;
+        return fallback;
     }
 
-    /// <summary>
-    /// Membaca dan mem-parse string JSON ke dalam C# Object List
-    /// </summary>
     private List<PlayerFishData> LoadDataFromJSON()
     {
         try
         {
-            // Bungkus array JSON ke dalam JSON Wrapper agar bisa dibaca JsonUtility Unity
             string wrappedJson = "{\"players\":" + dummyJson + "}";
             AquariumDataWrapper wrapper = JsonUtility.FromJson<AquariumDataWrapper>(wrappedJson);
-
             return (wrapper != null && wrapper.players != null) ? wrapper.players : new List<PlayerFishData>();
         }
         catch (Exception e)
@@ -259,100 +610,5 @@ public class BigAquariumManager : MonoBehaviour
             Debug.LogError($"[BigAquariumManager] Error parsing JSON: {e.Message}");
             return new List<PlayerFishData>();
         }
-    }
-
-    /// <summary>
-    /// Menambahkan data player dummy otomatis jika data bawaan JSON kurang dari target minimum
-    /// </summary>
-    private void EnsureMinimumFishCount(List<PlayerFishData> list, int minTargetCount)
-    {
-        string[] sampleNames = { "Rudi", "Eka", "Dewi", "Fajar", "Gita", "Hana", "Irfan", "Joko", "Kiki", "Lani", "Maya", "Nico", "Rian", "Sari" };
-        string[] sampleRarities = { "Common", "Rare", "Epic", "Legendary" };
-        string[] sampleColors = { "red", "blue", "green", "yellow" };
-        string[] sampleAccessories = { "", "", "hat_bigtop", "hat_cowboy", "glasses_fancy", "glasses_redsand", "" };
-
-        // Hitung total ikan saat ini
-        int currentFishCount = 0;
-        foreach (var p in list)
-        {
-            if (p.fish != null)
-                currentFishCount += p.fish.Count;
-        }
-
-        int index = 0;
-        // Tambahkan ikan dummy baru jika masih kurang dari target (15)
-        while (currentFishCount < minTargetCount)
-        {
-            string randomName = sampleNames[index % sampleNames.Length];
-            string randomRarity = sampleRarities[UnityEngine.Random.Range(0, sampleRarities.Length)];
-            string randomColor = sampleColors[UnityEngine.Random.Range(0, sampleColors.Length)];
-
-            list.Add(new PlayerFishData
-            {
-                name = randomName,
-                fish = new List<BigAquariumFishData> { new BigAquariumFishData { tier = randomRarity, colorVariant = randomColor, accessoryId = sampleAccessories[index % sampleAccessories.Length] } }
-            });
-
-            currentFishCount++;
-            index++;
-        }
-    }
-
-    /// <summary>
-    /// Men-spawn setiap ikan milik player ke Canvas Akuarium (Fallback / Offline Mode)
-    /// </summary>
-    private void SpawnAllFish(List<PlayerFishData> players)
-    {
-        if (fishPrefab == null || aquariumArea == null)
-        {
-            Debug.LogError("[BigAquariumManager] FishPrefab atau AquariumArea belum di-assign di Inspector!");
-            return;
-        }
-
-        foreach (PlayerFishData player in players)
-        {
-            if (player.fish == null) continue;
-
-            foreach (BigAquariumFishData fishData in player.fish)
-            {
-                GameObject newFish = SpawnSingleFishObject(player.name, fishData.tier, fishData.colorVariant, fishData.accessoryId);
-                if (newFish != null)
-                {
-                    spawnedFallbackFish.Add(newFish);
-                }
-            }
-        }
-    }
-
-    private GameObject SpawnSingleFishObject(string ownerName, string tier, string colorVariant, string accessoryId)
-    {
-        Rect rect = aquariumArea.rect;
-
-        // 1. Instantiate Prefab Ikan sebagai child dari aquariumArea
-        GameObject newFish = Instantiate(fishPrefab, aquariumArea);
-        newFish.transform.SetAsLastSibling(); // Agar ikan tampil di lapisan paling depan
-
-        RectTransform fishRect = newFish.GetComponent<RectTransform>();
-        if (fishRect != null)
-        {
-            // Reset Scale & Z Position
-            fishRect.localScale = Vector3.one;
-
-            // Set Posisi Awal Acak di dalam batas aquariumArea
-            float randomX = UnityEngine.Random.Range(rect.xMin + 50f, rect.xMax - 50f);
-            float randomY = UnityEngine.Random.Range(rect.yMin + 50f, rect.yMax - 50f);
-
-            fishRect.anchoredPosition = new Vector2(randomX, randomY);
-            fishRect.localPosition = new Vector3(fishRect.localPosition.x, fishRect.localPosition.y, 0f);
-        }
-
-        // 2. Pass data Nama Pemilik, Tier & Color ke script AquariumFish
-        AquariumFish fishScript = newFish.GetComponent<AquariumFish>();
-        if (fishScript != null)
-        {
-            fishScript.SetupFish(ownerName, tier, colorVariant, accessoryId);
-        }
-
-        return newFish;
     }
 }

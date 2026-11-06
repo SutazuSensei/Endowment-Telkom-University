@@ -226,6 +226,7 @@ GameObject:
   - component: {fileID: 3376754747111601609}
   - component: {fileID: 5114904281955841927}
   - component: {fileID: 7571103325377139695}
+  - component: {fileID: -1385501843984629502}
   m_Layer: 5
   m_Name: fishPrefab
   m_TagString: Untagged
@@ -327,6 +328,8 @@ MonoBehaviour:
   tiltSpeed: 3
   swimArea: {fileID: 0}
   boundaryPadding: 20
+  inspectionBoundaryRadius: 320
+  boundaryRepulsionSpeed: 240
   fishSize: {x: 250, y: 134}
   applyFishSize: 0
 --- !u!114 &5114904281955841927
@@ -587,3 +590,39 @@ MonoBehaviour:
   swimYawSwayFrequency: 3.2
   minAnimatorSpeed: 0.65
   maxAnimatorSpeed: 1.5
+--- !u!58 &-1385501843984629502
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9138026842888442259}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 320

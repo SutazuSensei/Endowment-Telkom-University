@@ -674,6 +674,8 @@ MonoBehaviour:
   tiltSpeed: 3
   swimArea: {fileID: 659389966}
   boundaryPadding: 20
+  inspectionBoundaryRadius: 320
+  boundaryRepulsionSpeed: 240
   fishSize: {x: 200, y: 100}
   applyFishSize: 0
 --- !u!114 &227550662
@@ -2563,7 +2565,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -859
       objectReference: {fileID: 0}
     - target: {fileID: 5530934315723163784, guid: 6d0b7601a84bb034d97887766a9b8b72, type: 3}
       propertyPath: m_LocalPosition.y
@@ -6018,6 +6020,9 @@ MonoBehaviour:
   fishPrefab: {fileID: 9138026842888442259, guid: e79383e39d11c5c4b839e2faee657df9, type: 3}
   aquariumArea: {fileID: 2014634380}
   maxFishLimit: 15
+  currentPlayerDefaultName: Pandu (Tel-U)
+  rotationIntervalSeconds: 90
+  fishRotatedPerCycle: 3
   padWithDummyIfUnderMinimum: 0
   dummyJson: "[\r\n  {\r\n    \"name\":\"Andi\",\r\n    \"fish\":[{\"tier\":\"Common\",
     \"colorVariant\":\"red\"}]\r\n  },\r\n  {\r\n    \"name\":\"Siti\",\r\n    \"fish\":[{\"tier\":\"Common\",

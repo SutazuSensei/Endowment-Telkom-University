@@ -4,11 +4,12 @@ using UnityEngine;
 /// Controls the natural swimming movement of a single fish within a UI-based aquarium.
 /// Attach this to the fish RectTransform that is a child of the aquarium RectTransform.
 ///
-/// The fish cycles through five states:
-///   Swimming → Decelerating → Idle → Accelerating → Swimming
-///                           ↘ Eating ↗
+/// The fish cycles through states:
+///   Entering → Swimming → Decelerating → Idle → Accelerating → Swimming → Exiting
+///                                      ↘ Eating ↗
 /// with smooth speed transitions controlled by explicit acceleration / deceleration rates.
-/// Perlin-noise wobble, horizontal flipping, optional tilt, and idle bobbing are layered on top.
+/// Also enforces a personal repulsion boundary around any currently inspected fish in Big Aquarium
+/// so other fish never swim in front of or obstruct the inspected fish.
 /// </summary>
 public class FishMovement : MonoBehaviour
 {
@@ -16,11 +17,13 @@ public class FishMovement : MonoBehaviour
 
     private enum FishState
     {
+        Entering,       // Swimming into the aquarium from outside the boundary
         Swimming,       // Cruising toward target at full speed
         Decelerating,   // Approaching target — gradually gliding to a stop
         Idle,           // Stationary with gentle vertical bob
         Accelerating,   // Leaving idle — ramping speed up from zero
-        Eating          // Paused to eat a food item with gentle vertical bob
+        Eating,         // Paused to eat a food item with gentle vertical bob
+        Exiting         // Swimming out of the aquarium beyond the boundary to be destroyed
     }
 
     // ───────────────────────────── Inspector Parameters ─────────────────────────────
@@ -101,6 +104,13 @@ public class FishMovement : MonoBehaviour
     [Tooltip("Extra padding from aquarium edges so the fish does not touch the border (pixels).")]
     [SerializeField] private float boundaryPadding = 20f;
 
+    [Header("Inspection Boundary (Safe Zone)")]
+    [Tooltip("Radius (in UI pixels) around an inspected fish that other fish are not allowed to enter.")]
+    [SerializeField] private float inspectionBoundaryRadius = 320f;
+
+    [Tooltip("How strongly other fish steer away when near the inspected fish's boundary.")]
+    [SerializeField] private float boundaryRepulsionSpeed = 240f;
+
     [Header("Fish Size")]
     [Tooltip("The desired fish size in pixels. The aspect ratio of the original sprite is ~1.87:1.")]
     [SerializeField] private Vector2 fishSize = new Vector2(250f, 134f);
@@ -138,6 +148,23 @@ public class FishMovement : MonoBehaviour
     private float eatingTimer;
     private float currentHeadingX = 1f;
 
+    private bool hasCustomEntry = false;
+    private System.Action onExitCallback;
+    private CircleCollider2D boundaryCircleCollider;
+
+    /// <summary>
+    /// The fish currently being inspected/followed by the camera in Big Aquarium.
+    /// All other fish will respect its boundary radius and steer away.
+    /// </summary>
+    public static FishMovement InspectedFish { get; set; }
+
+    public Vector2 BasePosition => basePosition;
+    public float InspectionBoundaryRadius => (boundaryCircleCollider != null && boundaryCircleCollider.radius > 10f)
+        ? boundaryCircleCollider.radius
+        : inspectionBoundaryRadius;
+    public bool IsExiting => state == FishState.Exiting;
+    public bool IsEntering => state == FishState.Entering;
+
     public float TargetFacing => targetFacing;
     public float HeadingX => currentHeadingX;
     public float NormalizedSpeed => (moveSpeedMax > 0.01f) ? Mathf.Clamp01(currentSpeed / moveSpeedMax) : 0f;
@@ -146,12 +173,7 @@ public class FishMovement : MonoBehaviour
 
     private void Awake()
     {
-        fishRect = GetComponent<RectTransform>();
-
-        if (swimArea == null)
-        {
-            swimArea = transform.parent as RectTransform;
-        }
+        EnsureComponents();
 
         perlinSeed = Random.Range(0f, 1000f);
         float initialFacing = fishRect.localScale.x >= 0f ? 1f : -1f;
@@ -159,28 +181,66 @@ public class FishMovement : MonoBehaviour
         targetFacing = invertSpriteFacing ? -initialFacing : initialFacing;
     }
 
+    private void EnsureComponents()
+    {
+        if (fishRect == null)
+        {
+            fishRect = GetComponent<RectTransform>();
+        }
+
+        if (boundaryCircleCollider == null)
+        {
+            boundaryCircleCollider = GetComponent<CircleCollider2D>();
+        }
+
+        if (swimArea == null && transform.parent != null)
+        {
+            swimArea = transform.parent as RectTransform;
+        }
+    }
+
     private void Start()
     {
+        EnsureComponents();
+
         if (applyFishSize)
         {
             fishRect.sizeDelta = fishSize;
         }
 
-        basePosition = fishRect.anchoredPosition;
-        ClampBasePosition();
-        fishRect.anchoredPosition = basePosition;
+        if (!hasCustomEntry && state != FishState.Entering && state != FishState.Exiting)
+        {
+            basePosition = fishRect.anchoredPosition;
+            ClampBasePosition();
+            fishRect.anchoredPosition = basePosition;
 
-        PickNewTarget();
-        currentSpeed = targetSpeed;
-        state = FishState.Swimming;
+            PickNewTarget();
+            currentSpeed = targetSpeed;
+            state = FishState.Swimming;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (InspectedFish == this)
+        {
+            InspectedFish = null;
+        }
     }
 
     private void Update()
     {
-        UpdateFoodTargetTracking();
+        if (state != FishState.Entering && state != FishState.Exiting)
+        {
+            UpdateFoodTargetTracking();
+            EnforceInspectionBoundary();
+        }
 
         switch (state)
         {
+            case FishState.Entering:
+                UpdateEntering();
+                break;
             case FishState.Swimming:
                 UpdateSwimming();
                 break;
@@ -196,10 +256,150 @@ public class FishMovement : MonoBehaviour
             case FishState.Eating:
                 UpdateEating();
                 break;
+            case FishState.Exiting:
+                UpdateExiting();
+                break;
         }
 
         UpdateFlip();
         UpdateTilt();
+    }
+
+    // ───────────────────────────── Enter / Exit (Rotation) ─────────────────────────────
+
+    /// <summary>
+    /// Spawns the fish outside the aquarium boundary and makes it swim naturally into the aquarium.
+    /// </summary>
+    public void EnterFromOutside(Vector2 outsideStartPos, Vector2 insideTargetPos)
+    {
+        EnsureComponents();
+        hasCustomEntry = true;
+
+        basePosition = outsideStartPos;
+        fishRect.anchoredPosition = outsideStartPos;
+
+        targetPosition = insideTargetPos;
+        targetSpeed = moveSpeedMax * 1.15f;
+        currentSpeed = targetSpeed * 0.9f;
+        state = FishState.Entering;
+
+        float horizontalDiff = targetPosition.x - basePosition.x;
+        float rawFacing = horizontalDiff >= 0f ? 1f : -1f;
+        currentHeadingX = rawFacing;
+        targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
+    }
+
+    /// <summary>
+    /// Instructs the fish to swim out past the nearest horizontal aquarium boundary and destroy itself.
+    /// </summary>
+    public void SwimOutAndDestroy(System.Action onExited = null)
+    {
+        EnsureComponents();
+        onExitCallback = onExited;
+        targetFood = null;
+        state = FishState.Exiting;
+
+        Rect area = swimArea != null ? swimArea.rect : new Rect(-960f, -540f, 1920f, 1080f);
+        float exitMargin = Mathf.Max(320f, fishRect.sizeDelta.x * 1.5f);
+
+        // Swim out toward the closer side (left or right outside collider)
+        float exitX = (basePosition.x >= 0f) ? (area.xMax + exitMargin) : (area.xMin - exitMargin);
+        float exitY = Mathf.Clamp(basePosition.y + Random.Range(-90f, 90f), area.yMin + 80f, area.yMax - 80f);
+
+        targetPosition = new Vector2(exitX, exitY);
+        targetSpeed = moveSpeedMax * 1.35f;
+        currentSpeed = Mathf.Max(currentSpeed, moveSpeedMin);
+
+        float horizontalDiff = targetPosition.x - basePosition.x;
+        float rawFacing = horizontalDiff >= 0f ? 1f : -1f;
+        currentHeadingX = rawFacing;
+        targetFacing = invertSpriteFacing ? -rawFacing : rawFacing;
+    }
+
+    private void UpdateEntering()
+    {
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * 1.5f * Time.deltaTime);
+
+        Vector2 toTarget = targetPosition - basePosition;
+        float distance = toTarget.magnitude;
+
+        MoveAndWobble(toTarget, distance);
+
+        if (distance <= arrivalThreshold * 2.5f)
+        {
+            // Successfully entered the aquarium — switch to normal swimming inside bounds
+            state = FishState.Swimming;
+            ClampBasePosition();
+            PickNewTarget();
+        }
+    }
+
+    private void UpdateExiting()
+    {
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * 1.8f * Time.deltaTime);
+
+        Vector2 toTarget = targetPosition - basePosition;
+        float distance = toTarget.magnitude;
+
+        MoveAndWobble(toTarget, distance);
+
+        if (distance <= 35f)
+        {
+            onExitCallback?.Invoke();
+            onExitCallback = null;
+            Destroy(gameObject);
+        }
+    }
+
+    // ───────────────────────────── Inspection Boundary Repulsion ─────────────────────────────
+
+    /// <summary>
+    /// Ensures non-inspected fish never enter the personal boundary of the currently inspected fish,
+    /// preventing other fish from overlapping or covering the inspected fish.
+    /// </summary>
+    private void EnforceInspectionBoundary()
+    {
+        if (InspectedFish == null || InspectedFish == this) return;
+
+        Vector2 inspectedPos = InspectedFish.basePosition;
+        float safeRadius = Mathf.Max(InspectionBoundaryRadius, InspectedFish.InspectionBoundaryRadius);
+
+        Vector2 diff = basePosition - inspectedPos;
+        float dist = diff.magnitude;
+
+        if (dist < safeRadius)
+        {
+            Vector2 awayDir = (dist > 0.01f)
+                ? (diff / dist)
+                : new Vector2(currentHeadingX != 0f ? -currentHeadingX : 1f, 0.25f).normalized;
+
+            float penetrationRatio = 1f - Mathf.Clamp01(dist / safeRadius);
+            basePosition += awayDir * (boundaryRepulsionSpeed * (0.6f + penetrationRatio) * Time.deltaTime);
+
+            // Redirect target waypoint outside the inspected fish's boundary
+            Rect bounds = GetSwimBounds();
+            Vector2 escapeTarget = inspectedPos + awayDir * (safeRadius + 240f);
+            if (bounds.width > 0f && bounds.height > 0f)
+            {
+                escapeTarget.x = Mathf.Clamp(escapeTarget.x, bounds.xMin, bounds.xMax);
+                escapeTarget.y = Mathf.Clamp(escapeTarget.y, bounds.yMin, bounds.yMax);
+
+                // If clamped to wall right next to the inspected fish, escape vertically/horizontally to the opposite side
+                if (Vector2.Distance(escapeTarget, inspectedPos) < safeRadius * 0.95f)
+                {
+                    escapeTarget.x = (inspectedPos.x >= 0f) ? bounds.xMin + 100f : bounds.xMax - 100f;
+                }
+            }
+
+            targetPosition = escapeTarget;
+            targetSpeed = moveSpeedMax;
+            currentSpeed = Mathf.Max(currentSpeed, moveSpeedMin);
+
+            if (state == FishState.Idle || state == FishState.Decelerating)
+            {
+                state = FishState.Swimming;
+            }
+        }
     }
 
     // ───────────────────────────── Food Tracking & Mouth Position ─────────────────────────────
@@ -219,12 +419,10 @@ public class FishMovement : MonoBehaviour
         {
             if (targetFood.IsActive)
             {
-                // Always target the true food coordinates so the fish never moves in the wrong direction
                 targetPosition = targetFood.AnchoredPosition;
             }
             else
             {
-                // Food disappeared or was destroyed externally -> resume random target
                 targetFood = null;
                 if (state == FishState.Swimming || state == FishState.Decelerating)
                 {
@@ -241,21 +439,18 @@ public class FishMovement : MonoBehaviour
     public void SetFoodTarget(FoodController food)
     {
         if (food == null || !food.IsActive) return;
+        if (state == FishState.Entering || state == FishState.Exiting) return;
 
         targetFood = food;
         targetSpeed = moveSpeedMax;
         targetPosition = food.AnchoredPosition;
 
-        // Always switch to Accelerating/Swimming so the fish actively pursues the food without slowing down
         if (state == FishState.Idle || state == FishState.Eating || state == FishState.Decelerating)
         {
             state = FishState.Accelerating;
         }
     }
 
-    /// <summary>
-    /// Checks whether the mouth of the fish has reached the food item.
-    /// </summary>
     private bool CheckFoodArrival()
     {
         if (targetFood != null && targetFood.IsActive)
@@ -263,7 +458,6 @@ public class FishMovement : MonoBehaviour
             float mouthDistance = (GetMouthPosition() - targetFood.AnchoredPosition).magnitude;
             float centerDistance = (basePosition - targetFood.AnchoredPosition).magnitude;
 
-            // Arrived if the mouth touches the food OR if the food dropped onto the fish's body/tail
             if (mouthDistance <= foodArrivalThreshold || centerDistance <= (mouthOffset.x * 0.8f))
             {
                 currentSpeed = 0f;
@@ -277,22 +471,15 @@ public class FishMovement : MonoBehaviour
 
     // ───────────────────────────── Swimming ─────────────────────────────
 
-    /// <summary>
-    /// Cruising state. The fish maintains or ramps toward its target speed and checks
-    /// whether it has entered the slow-down zone around its waypoint.
-    /// </summary>
     private void UpdateSwimming()
     {
-        // Ensure speed is at cruising level (covers transition from Accelerating)
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
 
-        // Immediate food arrival check from mouth or body position
         if (CheckFoodArrival()) return;
 
         Vector2 toTarget = targetPosition - basePosition;
         float distance = toTarget.magnitude;
 
-        // If chasing food, do NOT enter Decelerating state — keep swimming at full speed until food is caught!
         if (targetFood == null && distance <= slowDownDistance)
         {
             state = FishState.Decelerating;
@@ -305,18 +492,10 @@ public class FishMovement : MonoBehaviour
 
     // ───────────────────────────── Decelerating ─────────────────────────────
 
-    /// <summary>
-    /// The fish glides to a stop as it approaches the waypoint. Speed is scaled
-    /// proportionally to the remaining distance within the slow-down zone, and the
-    /// rate of change is capped by the deceleration / acceleration parameters so the
-    /// transition is always smooth.
-    /// </summary>
     private void UpdateDecelerating()
     {
-        // Check food arrival
         if (CheckFoodArrival()) return;
 
-        // If targetFood was set while decelerating, switch immediately to Swimming so we don't slow down
         if (targetFood != null && targetFood.IsActive)
         {
             state = FishState.Swimming;
@@ -327,19 +506,15 @@ public class FishMovement : MonoBehaviour
         Vector2 toTarget = targetPosition - basePosition;
         float distance = toTarget.magnitude;
 
-        // Desired speed scales linearly: targetSpeed at slowDownDistance → 0 at arrivalThreshold
         float range = slowDownDistance - arrivalThreshold;
         float distanceRatio = (range > 0.01f)
             ? Mathf.Clamp01((distance - arrivalThreshold) / range)
             : 0f;
         float desiredSpeed = targetSpeed * distanceRatio;
 
-        // Use the appropriate rate depending on whether we need to speed up or slow down.
-        // (speed up can happen if the fish entered the zone while still accelerating)
         float rate = (currentSpeed > desiredSpeed) ? deceleration : acceleration;
         currentSpeed = Mathf.MoveTowards(currentSpeed, desiredSpeed, rate * Time.deltaTime);
 
-        // Normal waypoint arrival: speed has effectively reached zero — the fish has glided to a stop
         if (currentSpeed < 1f)
         {
             currentSpeed = 0f;
@@ -353,26 +528,19 @@ public class FishMovement : MonoBehaviour
 
     // ───────────────────────────── Accelerating ─────────────────────────────
 
-    /// <summary>
-    /// The fish ramps speed up from zero after leaving idle (or after a no-idle stop).
-    /// Once cruising speed is reached the state transitions to Swimming.
-    /// </summary>
     private void UpdateAccelerating()
     {
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
 
-        // Immediate food arrival check from mouth or body position
         if (CheckFoodArrival()) return;
 
         Vector2 toTarget = targetPosition - basePosition;
         float distance = toTarget.magnitude;
 
-        // If chasing food, do NOT enter Decelerating state — keep accelerating until cruising speed or caught!
         if (targetFood == null && distance <= slowDownDistance)
         {
             state = FishState.Decelerating;
         }
-        // Otherwise, once near cruising speed, enter normal swimming
         else if (currentSpeed >= targetSpeed * 0.95f)
         {
             currentSpeed = targetSpeed;
@@ -384,15 +552,10 @@ public class FishMovement : MonoBehaviour
 
     // ───────────────────────────── Idle & Eating ─────────────────────────────
 
-    /// <summary>
-    /// The fish is stationary and bobs gently. The bob fades in over 0.3 s at the
-    /// start and fades out over the last 0.3 s for seamless transitions.
-    /// </summary>
     private void UpdateIdle()
     {
         idleTimer -= Time.deltaTime;
 
-        // Bob using elapsed time since idle started so the oscillation always begins at 0.
         float elapsed = Time.time - idleStartTime;
         float fadeIn = Mathf.Clamp01(elapsed / 0.3f);
         float fadeOut = Mathf.Clamp01(idleTimer / 0.3f);
@@ -423,10 +586,6 @@ public class FishMovement : MonoBehaviour
         targetFood = null;
     }
 
-    /// <summary>
-    /// The fish pauses to eat after reaching the food.
-    /// Uses seamless bobbing and smoothly transitions back to Accelerating toward a new target.
-    /// </summary>
     private void UpdateEating()
     {
         eatingTimer -= Time.deltaTime;
@@ -458,7 +617,6 @@ public class FishMovement : MonoBehaviour
         }
         else
         {
-            // No idle — pick a new target and start accelerating immediately
             PickNewTarget();
             state = FishState.Accelerating;
         }
@@ -479,35 +637,39 @@ public class FishMovement : MonoBehaviour
         {
             targetPosition = basePosition;
             targetSpeed = moveSpeedMin;
-            Debug.LogWarning("[FishMovement] Swim area is too small for the fish. Check aquarium size, fish size, or boundary padding.");
             return;
         }
 
-        targetPosition = new Vector2(
-            Random.Range(bounds.xMin, bounds.xMax),
-            Random.Range(bounds.yMin, bounds.yMax)
-        );
+        // Try up to 8 times to pick a target outside the inspected fish's boundary
+        for (int attempt = 0; attempt < 8; attempt++)
+        {
+            Vector2 candidate = new Vector2(
+                Random.Range(bounds.xMin, bounds.xMax),
+                Random.Range(bounds.yMin, bounds.yMax)
+            );
+
+            if (InspectedFish == null || InspectedFish == this ||
+                Vector2.Distance(candidate, InspectedFish.basePosition) >= inspectionBoundaryRadius * 1.1f)
+            {
+                targetPosition = candidate;
+                break;
+            }
+
+            targetPosition = candidate;
+        }
 
         targetSpeed = Random.Range(moveSpeedMin, moveSpeedMax);
     }
 
     // ───────────────────────────── Shared Movement + Wobble ─────────────────────────────
 
-    /// <summary>
-    /// Advances the fish toward the target and applies Perlin-noise wobble.
-    /// Wobble amplitude is proportional to speed ratio so it fades naturally
-    /// during acceleration and deceleration — no separate fade logic needed.
-    /// Shared by Swimming, Decelerating, and Accelerating states.
-    /// </summary>
     private void MoveAndWobble(Vector2 toTarget, float distance)
     {
         Vector2 direction = (distance > 0.01f) ? toTarget / distance : lastMoveDirection;
         lastMoveDirection = direction;
 
-        // Advance logical position toward target
         basePosition = Vector2.MoveTowards(basePosition, targetPosition, currentSpeed * Time.deltaTime);
 
-        // Wobble perpendicular to movement direction, scaled by speed ratio
         float speedRatio = (targetSpeed > 0.01f) ? Mathf.Clamp01(currentSpeed / targetSpeed) : 0f;
         float perlinValue = Mathf.PerlinNoise(perlinSeed, Time.time * wobbleFrequency) * 2f - 1f;
         Vector2 perpendicular = new Vector2(-direction.y, direction.x);
@@ -524,7 +686,6 @@ public class FishMovement : MonoBehaviour
         {
             if (targetFood != null && targetFood.IsActive)
             {
-                // When pursuing food, always face directly toward the food item
                 float foodHorizontalDiff = targetFood.AnchoredPosition.x - basePosition.x;
                 if (Mathf.Abs(foodHorizontalDiff) > flipDeadZone)
                 {
@@ -535,7 +696,6 @@ public class FishMovement : MonoBehaviour
             }
             else
             {
-                // Normal waypoint flipping
                 float horizontalDiff = targetPosition.x - basePosition.x;
                 if (Mathf.Abs(horizontalDiff) > flipDeadZone)
                 {
@@ -546,7 +706,6 @@ public class FishMovement : MonoBehaviour
             }
         }
 
-        // Smoothly interpolate scale.x toward the target facing
         Vector3 scale = fishRect.localScale;
         if (GetComponent<Fish3DView>() != null) { fishRect.localScale = Vector3.one; return; }
         scale.x = Mathf.Lerp(scale.x, targetFacing, flipSpeed * Time.deltaTime);
@@ -561,11 +720,8 @@ public class FishMovement : MonoBehaviour
 
         if (state != FishState.Idle && state != FishState.Eating && lastMoveDirection.sqrMagnitude > 0.001f)
         {
-            // Tilt proportionally to the vertical component of movement
             targetTilt = lastMoveDirection.y * maxTiltAngle;
 
-            // When the fish faces left (scale.x flipped), the Z-rotation visual is
-            // mirrored, so invert the tilt to keep the nose pointing in the swim direction.
             if (targetFacing < 0f)
             {
                 targetTilt = -targetTilt;
@@ -579,10 +735,6 @@ public class FishMovement : MonoBehaviour
 
     // ───────────────────────────── Boundary ─────────────────────────────
 
-    /// <summary>
-    /// Returns the safe swim area in local coordinates of the swim area RectTransform,
-    /// inset by the fish's half-size and the extra padding.
-    /// </summary>
     private Rect GetSwimBounds()
     {
         if (swimArea == null)
@@ -605,10 +757,6 @@ public class FishMovement : MonoBehaviour
         );
     }
 
-    /// <summary>
-    /// Clamps <see cref="basePosition"/> within the swim bounds.
-    /// Called once at Start to ensure the fish begins inside the aquarium.
-    /// </summary>
     private void ClampBasePosition()
     {
         Rect bounds = GetSwimBounds();
@@ -619,17 +767,34 @@ public class FishMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the fish RectTransform position, clamped within the swim bounds as a safety net.
+    /// Sets the fish RectTransform position.
+    /// Clamped within swim bounds during normal swimming, and unclamped during Entering/Exiting so the fish can cross the aquarium boundary.
     /// </summary>
     private void ApplyPosition(Vector2 position)
     {
-        Rect bounds = GetSwimBounds();
-        if (bounds.width > 0f && bounds.height > 0f)
+        if (state != FishState.Entering && state != FishState.Exiting)
         {
-            position.x = Mathf.Clamp(position.x, bounds.xMin, bounds.xMax);
-            position.y = Mathf.Clamp(position.y, bounds.yMin, bounds.yMax);
+            Rect bounds = GetSwimBounds();
+            if (bounds.width > 0f && bounds.height > 0f)
+            {
+                position.x = Mathf.Clamp(position.x, bounds.xMin, bounds.xMax);
+                position.y = Mathf.Clamp(position.y, bounds.yMin, bounds.yMax);
+            }
         }
 
         fishRect.anchoredPosition = position;
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (InspectedFish == this)
+        {
+            Gizmos.color = new Color(0.15f, 0.95f, 1f, 0.65f);
+            Vector3 lossy = transform.lossyScale;
+            float worldRadius = inspectionBoundaryRadius * Mathf.Max(0.01f, Mathf.Abs(lossy.x));
+            Gizmos.DrawWireSphere(transform.position, worldRadius);
+        }
+    }
+#endif
 }
