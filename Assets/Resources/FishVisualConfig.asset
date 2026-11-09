@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acc501da33c55b84985606f6ca9503e5, type: 3}
+  m_Name: FishVisualConfig
+  m_EditorClassIdentifier: Assembly-CSharp::FishVisualConfig
+  activeFish3DPrefab: {fileID: 7020176606248558962, guid: 9531bd8f22a8c1346a4f7b867ad436ae, type: 3}
+  tier1FishPrefab: {fileID: 7020176606248558962, guid: 9531bd8f22a8c1346a4f7b867ad436ae, type: 3}
+  tier2FishPrefab: {fileID: 3078823623144221901, guid: ae4581892b1e5cf4bb4aca928034fc33, type: 3}
+  tier3FishPrefab: {fileID: 3078823623144221901, guid: ae4581892b1e5cf4bb4aca928034fc33, type: 3}
+  tier4FishPrefab: {fileID: 3078823623144221901, guid: ae4581892b1e5cf4bb4aca928034fc33, type: 3}
+  hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
+  glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
+  commonScale: 0.28
+  rareScale: 0.34
+  epicScale: 0.41
+  legendaryScale: 0.49
+  redColor: {r: 0.92, g: 0.2, b: 0.2, a: 1}
+  blueColor: {r: 0.15, g: 0.45, b: 0.95, a: 1}
+  yellowColor: {r: 0.95, g: 0.8, b: 0.12, a: 1}
+  greenColor: {r: 0.18, g: 0.82, b: 0.35, a: 1}

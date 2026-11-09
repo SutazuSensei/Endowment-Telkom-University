@@ -142,8 +142,9 @@ public class FeedController : MonoBehaviour
             }
         }
 
-        // If authenticated with backend, validate via POST /api/v1/me/fish/:fishId/feed
+        // If authenticated with backend and server is online, validate via POST /api/v1/me/fish/:fishId/feed
         if (enforceServerCooldown &&
+            BackendApiClient.Instance.IsServerReachable &&
             BackendApiClient.Instance.HasBearerToken &&
             !string.IsNullOrEmpty(BackendApiClient.Instance.ActiveFishId))
         {
@@ -167,7 +168,6 @@ public class FeedController : MonoBehaviour
                         ApplyCooldownUntil(DateTime.UtcNow.AddHours(SERVER_COOLDOWN_HOURS));
                     }
 
-                    Debug.Log($"[FeedController] Backend feed berhasil! Hunger={feedData.fish?.state?.hunger}, Mood={feedData.fish?.state?.mood}.");
                     return;
                 }
 
@@ -185,20 +185,10 @@ public class FeedController : MonoBehaviour
                         ApplyCooldownUntil(DateTime.UtcNow.AddHours(SERVER_COOLDOWN_HOURS));
                     }
 
-                    Debug.LogWarning($"[FeedController] Server menolak feed: {error.message}");
                     return;
                 }
 
-                // 3. Offline / Network Unreachable fallback -> allow local feeding for smooth offline demo
-                if (statusCode == 0 || (error != null && error.code == "NETWORK_UNREACHABLE"))
-                {
-                    Debug.LogWarning("[FeedController] Server offline, menjalankan feed dalam mode lokal.");
-                    SpawnAndFeed();
-                    return;
-                }
-
-                // 4. Other errors (e.g., 401/404) -> fallback to local feed with log
-                Debug.LogWarning($"[FeedController] Response {statusCode} ({error?.code}): menggunakan fallback lokal.");
+                // 3. Offline / Fallback -> allow local feeding cleanly
                 SpawnAndFeed();
             });
 

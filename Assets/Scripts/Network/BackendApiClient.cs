@@ -10,8 +10,10 @@ namespace Endowment.Network
     /// Central HTTP client for communicating with the Tel-U Endowment Aquarium Game API (:3000)
     /// and Mock Endowment API (:4000).
     /// 
-    /// Designed for Unity WebGL compatibility (uses UnityWebRequest coroutines, no blocking threads).
-    /// Auto-instantiates as a persistent singleton if not already placed in the scene.
+    /// Features Fast Offline Detection:
+    /// If the backend server is not active (e.g., running on a developer/teammate PC without Node.js),
+    /// it logs a single clean info message and switches to silent Offline Fallback mode without
+    /// spamming console errors or blocking gameplay.
     /// </summary>
     public class BackendApiClient : MonoBehaviour
     {
@@ -56,18 +58,21 @@ namespace Endowment.Network
         [SerializeField] private string devDonorDisplayName = "Pandu (Tel-U)";
 
         [Tooltip("Request timeout in seconds before falling back to offline mode.")]
-        [SerializeField] private int requestTimeoutSeconds = 8;
+        [SerializeField] private int requestTimeoutSeconds = 3;
 
         private string runtimeBearerToken;
         private string cachedActiveFishId;
         private bool isServerReachable = true;
+        private bool hasLoggedOfflineNotice = false;
+        private float lastOfflineTimestamp = -999f;
+        private const float OFFLINE_RETRY_COOLDOWN = 15f;
 
         public string GameApiBaseUrl => gameApiBaseUrl.TrimEnd('/');
         public string MockApiBaseUrl => mockApiBaseUrl.TrimEnd('/');
         public bool IsServerReachable => isServerReachable;
 
         public string DonorExternalId => !string.IsNullOrEmpty(devDonorExternalId) ? devDonorExternalId : "donor-pandu-dev";
-        public string DonorDisplayName => !string.IsNullOrEmpty(devDonorDisplayName) ? devDonorDisplayName : "Pandu (Tel-U)";
+        public string DonorDisplayName => !string.IsNullOrEmpty(devDonorDisplayName) ? devDonorDisplayName : OfflineDummyData.DEFAULT_PLAYER_NAME;
 
         public bool HasBearerToken => !string.IsNullOrEmpty(GetBearerToken());
 
@@ -103,7 +108,6 @@ namespace Endowment.Network
 
         private void InitializeAuthFromEnvironment()
         {
-            // 1. Check WebGL URL query parameter (?token=...) if running in browser
             string urlToken = ExtractQueryParameter(Application.absoluteURL, "token");
             if (!string.IsNullOrEmpty(urlToken))
             {
@@ -111,7 +115,6 @@ namespace Endowment.Network
                 return;
             }
 
-            // 2. Check Inspector devBearerToken override
             if (!string.IsNullOrEmpty(devBearerToken))
             {
                 runtimeBearerToken = devBearerToken.Trim();
@@ -120,7 +123,6 @@ namespace Endowment.Network
                 return;
             }
 
-            // 3. Load persisted token from PlayerPrefs
             if (PlayerPrefs.HasKey(PREF_BEARER_TOKEN))
             {
                 runtimeBearerToken = PlayerPrefs.GetString(PREF_BEARER_TOKEN, "");
@@ -156,9 +158,6 @@ namespace Endowment.Network
         // Public API Methods
         // ─────────────────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// GET /api/v1/health
-        /// </summary>
         public void CheckHealth(Action<bool> onComplete)
         {
             string url = $"{GameApiBaseUrl}/api/v1/health";
@@ -170,10 +169,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// POST /api/v1/auth/exchange
-        /// Validates and exchanges a raw magic token for a Bearer access token.
-        /// </summary>
         public void ExchangeToken(string rawToken, Action<AuthExchangeDataDTO, ApiErrorDTO> onComplete)
         {
             string url = $"{GameApiBaseUrl}/api/v1/auth/exchange";
@@ -202,10 +197,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// GET /api/v1/big-aquarium?limit=15
-        /// Fetches the public exhibition feed (1 active fish per donor, max 50).
-        /// </summary>
         public void GetBigAquarium(int limit, Action<BigAquariumDataDTO, ApiErrorDTO> onComplete)
         {
             int clampedLimit = Mathf.Clamp(limit, 1, 50);
@@ -233,10 +224,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// GET /api/v1/me/aquarium
-        /// Requires Bearer authentication. Returns the authenticated donor's personal aquarium.
-        /// </summary>
         public void GetPersonalAquarium(Action<PersonalAquariumDataDTO, ApiErrorDTO> onComplete)
         {
             string url = $"{GameApiBaseUrl}/api/v1/me/aquarium";
@@ -254,7 +241,6 @@ namespace Endowment.Network
                     var env = SafeFromJson<PersonalAquariumEnvelopeDTO>(body);
                     if (env != null && env.data != null)
                     {
-                        // Cache active fish ID for subsequent feed/appearance requests
                         if (env.data.fish != null && env.data.fish.Count > 0)
                         {
                             PersonalFishDTO active = env.data.fish.Find(f => f.state != null && f.state.isActive)
@@ -273,10 +259,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// GET /api/v1/aquariums/:publicSlug
-        /// Fetches a public read-only view of a donor's aquarium.
-        /// </summary>
         public void GetPublicAquarium(string publicSlug, Action<PersonalAquariumDataDTO, ApiErrorDTO> onComplete)
         {
             string url = $"{GameApiBaseUrl}/api/v1/aquariums/{UnityWebRequest.EscapeURL(publicSlug)}";
@@ -303,22 +285,12 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// POST /api/v1/me/fish/:fishId/feed
-        /// Feeds the specified fish (4-hour server-side cooldown).
-        /// If cooldown is active, server returns HTTP 409 with error.code == "FEEDING_COOLDOWN_ACTIVE"
-        /// and error.details.nextFeedAt.
-        /// </summary>
         public void FeedFish(string fishId, Action<FeedFishDataDTO, ApiErrorDTO, long> onComplete)
         {
             string targetId = !string.IsNullOrEmpty(fishId) ? fishId : ActiveFishId;
-            if (string.IsNullOrEmpty(targetId))
+            if (string.IsNullOrEmpty(targetId) || !isServerReachable)
             {
-                onComplete?.Invoke(null, new ApiErrorDTO
-                {
-                    code = "MISSING_FISH_ID",
-                    message = "Belum ada ID ikan aktif dari server."
-                }, 400);
+                onComplete?.Invoke(null, CreateNetworkError(), 0);
                 return;
             }
 
@@ -346,10 +318,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// PATCH /api/v1/me/fish/:fishId/appearance
-        /// Updates fish colorCode and accessoryCode on the backend.
-        /// </summary>
         public void UpdateFishAppearance(
             string fishId,
             string clientColorVariant,
@@ -357,13 +325,9 @@ namespace Endowment.Network
             Action<PersonalFishDTO, ApiErrorDTO> onComplete = null)
         {
             string targetId = !string.IsNullOrEmpty(fishId) ? fishId : ActiveFishId;
-            if (string.IsNullOrEmpty(targetId) || !HasBearerToken)
+            if (string.IsNullOrEmpty(targetId) || !HasBearerToken || !isServerReachable)
             {
-                onComplete?.Invoke(null, new ApiErrorDTO
-                {
-                    code = "OFFLINE_OR_UNAUTHENTICATED",
-                    message = "Perubahan disimpan secara lokal."
-                });
+                onComplete?.Invoke(null, CreateNetworkError());
                 return;
             }
 
@@ -397,16 +361,14 @@ namespace Endowment.Network
             }));
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Mock Endowment API Methods (:4000)
-        // ─────────────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Simulates a donation of the specified tier for the active donor account (donorExternalId).
-        /// Delivers the webhook to Game API, generating the fish with matching tierCode in the database.
-        /// </summary>
         public void SimulateTierDonation(string tier, Action<bool, string> onComplete = null)
         {
+            if (!isServerReachable && (Time.unscaledTime - lastOfflineTimestamp) < OFFLINE_RETRY_COOLDOWN)
+            {
+                onComplete?.Invoke(false, "Offline Mode");
+                return;
+            }
+
             int amount = BackendContractMapper.GetAmountForTier(tier);
             string donorId = DonorExternalId;
             string donorName = DonorDisplayName;
@@ -425,22 +387,15 @@ namespace Endowment.Network
             {
                 if (mockData != null)
                 {
-                    Debug.Log($"[BackendApiClient] Mock tier donation created for {donorId}: Tier={tier}, Amount=Rp {amount:N0}, EventId={mockData.eventId}");
                     onComplete?.Invoke(true, tier);
                 }
                 else
                 {
-                    string errMsg = err != null ? err.message : "Gagal menghubungi Mock API";
-                    Debug.LogWarning($"[BackendApiClient] Mock donation failed: {errMsg}");
-                    onComplete?.Invoke(false, errMsg);
+                    onComplete?.Invoke(false, err != null ? err.message : "Offline Mode");
                 }
             });
         }
 
-        /// <summary>
-        /// POST /mock/v1/scenarios/:scenario ('common' | 'rare' | 'epic' | 'legendary' | 'random')
-        /// Triggers a simulated donation and webhook delivery to the Game API.
-        /// </summary>
         public void TriggerMockScenario(string scenarioOrTier, Action<MockDonationDataDTO, ApiErrorDTO> onComplete = null)
         {
             string slug = BackendContractMapper.ToScenarioSlug(scenarioOrTier);
@@ -468,10 +423,6 @@ namespace Endowment.Network
             }));
         }
 
-        /// <summary>
-        /// POST /mock/v1/donations
-        /// Triggers a custom mock donation (e.g. with showName = true so donor's name is visible publicly).
-        /// </summary>
         public void CreateMockDonation(MockDonationRequestDTO input, Action<MockDonationDataDTO, ApiErrorDTO> onComplete = null)
         {
             string url = $"{MockApiBaseUrl}/mock/v1/donations";
@@ -500,7 +451,7 @@ namespace Endowment.Network
         }
 
         // ─────────────────────────────────────────────────────────────────────
-        // Low-Level UnityWebRequest Dispatcher
+        // Low-Level UnityWebRequest Dispatcher with Fast Offline Short-Circuit
         // ─────────────────────────────────────────────────────────────────────
 
         private IEnumerator SendJsonRequest(
@@ -510,10 +461,17 @@ namespace Endowment.Network
             bool requireAuth,
             Action<long, string, bool> callback)
         {
+            // Fast short-circuit if server was recently detected offline so we don't stall
+            if (!isServerReachable && (Time.unscaledTime - lastOfflineTimestamp) < OFFLINE_RETRY_COOLDOWN)
+            {
+                callback?.Invoke(0, "", true);
+                yield break;
+            }
+
             using (UnityWebRequest req = new UnityWebRequest(url, method))
             {
                 req.downloadHandler = new DownloadHandlerBuffer();
-                req.timeout = Mathf.Max(3, requestTimeoutSeconds);
+                req.timeout = Mathf.Max(2, requestTimeoutSeconds);
 
                 req.SetRequestHeader("X-Request-ID", Guid.NewGuid().ToString());
                 req.SetRequestHeader("Accept", "application/json");
@@ -539,7 +497,21 @@ namespace Endowment.Network
                 bool isNetworkFailure = req.result == UnityWebRequest.Result.ConnectionError ||
                                         req.result == UnityWebRequest.Result.DataProcessingError;
 
-                isServerReachable = !isNetworkFailure;
+                if (isNetworkFailure)
+                {
+                    isServerReachable = false;
+                    lastOfflineTimestamp = Time.unscaledTime;
+                    if (!hasLoggedOfflineNotice)
+                    {
+                        hasLoggedOfflineNotice = true;
+                        Debug.Log("[BackendApiClient] Server backend tidak terdeteksi — berjalan otomatis dalam Mode Offline (Dummy Data Aktif).");
+                    }
+                }
+                else
+                {
+                    isServerReachable = true;
+                    hasLoggedOfflineNotice = false;
+                }
 
                 string responseText = req.downloadHandler != null ? req.downloadHandler.text : "";
                 callback?.Invoke(req.responseCode, responseText, isNetworkFailure);
@@ -553,9 +525,8 @@ namespace Endowment.Network
             {
                 return JsonUtility.FromJson<T>(json);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Debug.LogWarning($"[BackendApiClient] JSON parse warning ({typeof(T).Name}): {e.Message}");
                 return null;
             }
         }
@@ -583,7 +554,7 @@ namespace Endowment.Network
             return new ApiErrorDTO
             {
                 code = "NETWORK_UNREACHABLE",
-                message = "Server backend tidak terjangkau (Offline Fallback Aktif)."
+                message = "Mode Offline Fallback Aktif."
             };
         }
 

@@ -1,22 +1,23 @@
 using UnityEngine;
-using UnityEngine.UI;
 using Endowment.Gameplay;
 
 /// <summary>
-/// Renders and animates the 3D Fish model (Blue Powder Tang or Procedural Nemo) + 3D Accessories (Top Hat, Glasses)
+/// Renders and animates the 3D Fish model + 3D Accessories (Top Hat, Glasses)
 /// synchronized to this UI RectTransform's screen position.
-/// Bridges the LoFi 2D RectTransform gameplay systems (FishMovement, ShowcaseFishBob, Food, OwnerName)
-/// with the Prototype's 3D SkinnedMeshRenderer, Animator, fishmask shader, and CameraZoomTransition.
+/// 
+/// Pulls its 3D Fish Prefab, 3D Accessory Prefabs, Tier Scales, and Color Palette
+/// from the Single Source of Truth (Resources/FishVisualConfig.asset) so that
+/// Aquarium, Collection, and BigAquarium always render the exact same 3D fish model.
 /// </summary>
 public class Fish3DView : MonoBehaviour
 {
-    [Header("3D Prefabs")]
+    [Header("Optional Local Overrides (Default: Loaded from FishVisualConfig)")]
     [SerializeField] private GameObject fish3DPrefab;
     [SerializeField] private GameObject hat3DPrefab;
     [SerializeField] private GameObject glasses3DPrefab;
 
     [Header("Scale & Depth Settings")]
-    [SerializeField] private float baseWorldDepthFromCamera = 103.3f; // z = -19.7 when camera is at z = -123
+    [SerializeField] private float baseWorldDepthFromCamera = 103.3f;
     [SerializeField] private float scaleMultiplier = 1.0f;
     [SerializeField] private float referenceCameraOrthoSize = 81.42f;
 
@@ -30,12 +31,12 @@ public class Fish3DView : MonoBehaviour
     [SerializeField] private float maxAnimatorSpeed = 1.50f;
 
     private GameObject fish3DInstance;
+    private GameObject currentSpawnedModelPrefab;
     private Transform modelTransform;
     private Animator fishAnimator;
-    private SkinnedMeshRenderer fishRenderer;
-    private MeshRenderer staticMeshRenderer;
     private ProceduralFishAnimator proceduralAnimator;
     private ModularFishAnimator modularAnimator;
+    private DynamicRiggedFishAnimator dynamicRiggedAnimator;
     private Transform hatSocket;
     private Transform glassesSocket;
 
@@ -77,13 +78,11 @@ public class Fish3DView : MonoBehaviour
         randomPhase = Random.Range(0f, 100f);
         depthJitter = Random.Range(-3.5f, 3.5f);
 
-        HideLegacy2DSprites();
         Ensure3DInstance();
     }
 
     private void Start()
     {
-        HideLegacy2DSprites();
         EnsureCameras();
         ApplyVisualState();
         UpdateWorldTransform(true);
@@ -115,7 +114,6 @@ public class Fish3DView : MonoBehaviour
 
     private void LateUpdate()
     {
-        HideLegacy2DSprites();
         UpdateWorldTransform(false);
     }
 
@@ -144,31 +142,15 @@ public class Fish3DView : MonoBehaviour
         if (!string.IsNullOrEmpty(colorVariant)) currentColorVariant = colorVariant;
         currentAccessoryId = accessoryId ?? "";
 
+        ResolveSingleSourcePrefabs(out GameObject targetFishPrefab, out _, out _);
+        if (targetFishPrefab != null && targetFishPrefab != currentSpawnedModelPrefab && fish3DInstance != null)
+        {
+            Destroy(fish3DInstance);
+            fish3DInstance = null;
+        }
+
         Ensure3DInstance();
         ApplyVisualState();
-    }
-
-    private void HideLegacy2DSprites()
-    {
-        Image selfImg = GetComponent<Image>();
-        if (selfImg != null && selfImg.enabled)
-        {
-            selfImg.enabled = false;
-        }
-
-        // Hide 2D accessory overlay images while keeping text (like ownerText) visible
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            Transform child = transform.GetChild(i);
-            if (child.name.IndexOf("Accessory", System.StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                Image childImg = child.GetComponent<Image>();
-                if (childImg != null && childImg.enabled)
-                {
-                    childImg.enabled = false;
-                }
-            }
-        }
     }
 
     private void EnsureCameras()
@@ -187,32 +169,50 @@ public class Fish3DView : MonoBehaviour
         }
     }
 
+    private void ResolveSingleSourcePrefabs(out GameObject resolvedFishPrefab, out GameObject resolvedHatPrefab, out GameObject resolvedGlassesPrefab)
+    {
+        FishVisualConfig config = FishVisualConfig.Instance;
+        resolvedFishPrefab = (config != null) ? config.GetFishPrefabForTier(currentTier) : fish3DPrefab;
+        if (resolvedFishPrefab == null) resolvedFishPrefab = (config != null && config.activeFish3DPrefab != null) ? config.activeFish3DPrefab : fish3DPrefab;
+        resolvedHatPrefab = (config != null && config.hat3DPrefab != null) ? config.hat3DPrefab : hat3DPrefab;
+        resolvedGlassesPrefab = (config != null && config.glasses3DPrefab != null) ? config.glasses3DPrefab : glasses3DPrefab;
+    }
+
     private void Ensure3DInstance()
     {
         if (fish3DInstance != null) return;
 
-        if (fish3DPrefab == null) return;
+        ResolveSingleSourcePrefabs(out GameObject targetFishPrefab, out GameObject targetHatPrefab, out GameObject targetGlassesPrefab);
+        if (targetFishPrefab == null) return;
 
-        fish3DInstance = Instantiate(fish3DPrefab);
+        currentSpawnedModelPrefab = targetFishPrefab;
+        fish3DInstance = Instantiate(targetFishPrefab);
         fish3DInstance.name = $"Fish3D_{gameObject.name}";
 
         modelTransform = fish3DInstance.transform.Find("Model");
         if (modelTransform == null) modelTransform = fish3DInstance.transform;
 
         fishAnimator = fish3DInstance.GetComponentInChildren<Animator>();
-        fishRenderer = fish3DInstance.GetComponentInChildren<SkinnedMeshRenderer>();
-        staticMeshRenderer = fish3DInstance.GetComponentInChildren<MeshRenderer>();
         proceduralAnimator = fish3DInstance.GetComponentInChildren<ProceduralFishAnimator>();
         modularAnimator = fish3DInstance.GetComponentInChildren<ModularFishAnimator>();
+        dynamicRiggedAnimator = fish3DInstance.GetComponentInChildren<DynamicRiggedFishAnimator>();
 
-        if (fishAnimator != null)
+        if (dynamicRiggedAnimator != null)
+        {
+            dynamicRiggedAnimator.Bind(fishMovement, this);
+            if (fishAnimator != null)
+            {
+                fishAnimator.enabled = false;
+            }
+        }
+        else if (fishAnimator != null)
         {
             fishAnimator.enabled = true;
-            // Randomize animation start time so multiple fish never flap in robotic sync
             fishAnimator.Play(0, 0, Random.value);
         }
 
-        // Locate sockets on Head bone or procedural animator
+        hatSocket = null;
+        glassesSocket = null;
         Transform[] allTransforms = fish3DInstance.GetComponentsInChildren<Transform>(true);
         foreach (Transform t in allTransforms)
         {
@@ -223,9 +223,9 @@ public class Fish3DView : MonoBehaviour
         if (hatSocket == null && proceduralAnimator != null) hatSocket = proceduralAnimator.HatSocket;
         if (glassesSocket == null && proceduralAnimator != null) glassesSocket = proceduralAnimator.GlassesSocket;
 
-        if (hatSocket != null && hat3DPrefab != null)
+        if (hatSocket != null && targetHatPrefab != null)
         {
-            hatInstance = Instantiate(hat3DPrefab, hatSocket, false);
+            hatInstance = Instantiate(targetHatPrefab, hatSocket, false);
             hatInstance.name = "Acc3D_TopHat";
             hatInstance.transform.localPosition = Vector3.zero;
             hatInstance.transform.localRotation = Quaternion.identity;
@@ -233,9 +233,9 @@ public class Fish3DView : MonoBehaviour
             hatInstance.SetActive(false);
         }
 
-        if (glassesSocket != null && glasses3DPrefab != null)
+        if (glassesSocket != null && targetGlassesPrefab != null)
         {
-            glassesInstance = Instantiate(glasses3DPrefab, glassesSocket, false);
+            glassesInstance = Instantiate(targetGlassesPrefab, glassesSocket, false);
             glassesInstance.name = "Acc3D_Glasses";
             glassesInstance.transform.localPosition = Vector3.zero;
             glassesInstance.transform.localRotation = Quaternion.identity;
@@ -261,7 +261,7 @@ public class Fish3DView : MonoBehaviour
             r.SetPropertyBlock(fishPropBlock);
         }
 
-        // 2. Apply 3D Accessory (Top Hat or Glasses) attached to Head bone socket
+        // 2. Apply 3D Accessory (Top Hat or Glasses) attached to socket
         bool showHat = false;
         bool showGlasses = false;
 
@@ -301,13 +301,11 @@ public class Fish3DView : MonoBehaviour
         }
         else if (idLower.Contains("telu"))
         {
-            // Telkom University Crimson Red & Pure White
             crownColor = new Color(0.82f, 0.12f, 0.16f, 1f);
             ribbonColor = new Color(0.96f, 0.96f, 0.98f, 1f);
         }
         else if (idLower.Contains("graduation"))
         {
-            // Academic Black & Gold Tassel Ribbon
             crownColor = new Color(0.10f, 0.10f, 0.13f, 1f);
             ribbonColor = new Color(0.95f, 0.78f, 0.18f, 1f);
         }
@@ -331,14 +329,14 @@ public class Fish3DView : MonoBehaviour
     {
         if (glassesInstance == null) return;
 
-        Color frameColor = new Color(0.95f, 0.78f, 0.20f, 1f); // Gold (Fancy)
+        Color frameColor = new Color(0.95f, 0.78f, 0.20f, 1f);
         if (idLower.Contains("redsand") || idLower.Contains("evil"))
         {
-            frameColor = new Color(0.90f, 0.15f, 0.18f, 1f); // Evil Red
+            frameColor = new Color(0.90f, 0.15f, 0.18f, 1f);
         }
         else if (idLower.Contains("starfish"))
         {
-            frameColor = new Color(0.98f, 0.50f, 0.18f, 1f); // Starfish Coral Orange
+            frameColor = new Color(0.98f, 0.50f, 0.18f, 1f);
         }
 
         foreach (MeshRenderer mr in glassesInstance.GetComponentsInChildren<MeshRenderer>(true))
@@ -363,7 +361,12 @@ public class Fish3DView : MonoBehaviour
 
     public static Color ResolveFishColor(string variant)
     {
-        if (string.IsNullOrEmpty(variant)) return new Color(0.134f, 0.194f, 0.292f, 1f);
+        if (FishVisualConfig.Instance != null)
+        {
+            return FishVisualConfig.Instance.ResolveColor(variant);
+        }
+
+        if (string.IsNullOrEmpty(variant)) return new Color(0.15f, 0.45f, 0.95f, 1f);
 
         switch (variant.Trim().ToLowerInvariant())
         {
@@ -388,7 +391,12 @@ public class Fish3DView : MonoBehaviour
 
     private float GetTierScale(string tier)
     {
-        if (string.IsNullOrEmpty(tier)) return 0.35f;
+        if (FishVisualConfig.Instance != null)
+        {
+            return FishVisualConfig.Instance.GetScaleForTier(tier);
+        }
+
+        if (string.IsNullOrEmpty(tier)) return 0.28f;
 
         switch (tier.Trim().ToLowerInvariant())
         {
@@ -401,7 +409,7 @@ public class Fish3DView : MonoBehaviour
             case "legendary":
                 return 0.49f;
             default:
-                return 0.35f;
+                return 0.28f;
         }
     }
 
@@ -422,7 +430,7 @@ public class Fish3DView : MonoBehaviour
         Vector3 worldPos = cam3D.ScreenToWorldPoint(new Vector3(screenPoint.x, screenPoint.y, depth));
         fish3DInstance.transform.position = worldPos;
 
-        // 2. Compute Tier Scale * Zoom Scale (shrinks smoothly when 2d camera zooms out in Big Aquarium!)
+        // 2. Compute Tier Scale * Zoom Scale
         float tierScale = GetTierScale(currentTier);
         float zoomRatio = 1f;
         if (cam2D != null && cam2D.orthographic && cam2D.orthographicSize > 1f)
@@ -457,7 +465,6 @@ public class Fish3DView : MonoBehaviour
         }
         else
         {
-            // Showcase mode (Collection scene): face right and gently sway
             facing = 1f;
             speedRatio = 0.35f;
             verticalVelNorm = Mathf.Clamp(frameDelta.y / 40f, -0.5f, 0.5f);
@@ -487,9 +494,13 @@ public class Fish3DView : MonoBehaviour
 
         fish3DInstance.transform.rotation = Quaternion.Euler(currentPitch, currentYaw + sway, currentRoll);
 
-        // 4. Sync Animator / Procedural tail speed to swimming speed
+        // 4. Sync Animator / Dynamic Rigged Animator / Procedural / Modular fin speed to swimming speed
         float calculatedSpeed = Mathf.Lerp(minAnimatorSpeed, maxAnimatorSpeed, speedRatio);
-        if (fishAnimator != null)
+        if (dynamicRiggedAnimator != null && dynamicRiggedAnimator.enabled)
+        {
+            dynamicRiggedAnimator.UpdateMotion(speedRatio, yawVelocity, currentPitch, (speedRatio < 0.05f));
+        }
+        else if (fishAnimator != null && fishAnimator.enabled)
         {
             fishAnimator.speed = calculatedSpeed;
         }
@@ -503,4 +514,3 @@ public class Fish3DView : MonoBehaviour
         }
     }
 }
-

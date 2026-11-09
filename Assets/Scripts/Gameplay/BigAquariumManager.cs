@@ -4,37 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Endowment.Network;
 
-// Data Models (Legacy / Offline Fallback)
-
-[Serializable]
-public class BigAquariumFishData
-{
-    public string tier;
-    public string colorVariant;
-    public string accessoryId;
-}
-
-[Serializable]
-public class PlayerFishData
-{
-    public string name;
-    public List<BigAquariumFishData> fish;
-}
-
-[Serializable]
-public class AquariumDataWrapper
-{
-    public List<PlayerFishData> players;
-}
-
 /// <summary>
 /// Manages the Big Aquarium exhibition mode:
-/// - Always maintains exactly 15 fish in the aquarium:
+/// - Always maintains 15 fish in the aquarium:
 ///   * 1 Current Player Fish (permanent, NEVER rotated out).
 ///   * 14 Random Donor Fish (periodically rotated a few at a time).
 /// - When rotating fish, outgoing fish swim out past the aquarium boundary collider,
 ///   and incoming replacement fish spawn outside the boundary and swim in naturally.
-/// - Provides search lookup by donor name for BigAquariumSearchController.
+/// - Seamlessly merges live Backend API donor data with OfflineDummyData fallback so it
+///   always works with zero errors whether the backend server is online or offline.
 /// </summary>
 public class BigAquariumManager : MonoBehaviour
 {
@@ -49,7 +27,7 @@ public class BigAquariumManager : MonoBehaviour
     }
 
     [Header("UI & Prefab References")]
-    [Tooltip("Prefab Ikan UI yang memiliki komponen AquariumFish dan FishMovement")]
+    [Tooltip("Prefab Ikan UI yang memiliki komponen AquariumFish, FishMovement, dan Fish3DView")]
     public GameObject fishPrefab;
 
     [Tooltip("Panel UI RectTransform tempat ikan berenang (Big Aquarium Area)")]
@@ -61,7 +39,7 @@ public class BigAquariumManager : MonoBehaviour
     public int maxFishLimit = 15;
 
     [Tooltip("Nama default untuk ikan Current Player jika nama dari BackendApiClient kosong.")]
-    public string currentPlayerDefaultName = "Pandu (Tel-U)";
+    public string currentPlayerDefaultName = OfflineDummyData.DEFAULT_PLAYER_NAME;
 
     [Header("Partial Rotation Settings")]
     [Tooltip("Interval waktu (detik) untuk merotasi sebagian ikan random.")]
@@ -71,26 +49,6 @@ public class BigAquariumManager : MonoBehaviour
     [Tooltip("Jumlah ikan random yang digantikan setiap siklus rotasi (jangan semua sekaligus).")]
     [Range(1, 6)]
     public int fishRotatedPerCycle = 3;
-
-    [Tooltip("Jika aktif, tambahkan ikan dummy lokal apabila jumlah ikan dari server kurang dari target.")]
-    public bool padWithDummyIfUnderMinimum = true;
-
-    [Header("Offline Fallback / Dummy JSON Data")]
-    [TextArea(10, 15)]
-    public string dummyJson = @"[
-  {
-    ""name"":""Andi"",
-    ""fish"":[{""tier"":""Common"", ""colorVariant"":""red""}]
-  },
-  {
-    ""name"":""Siti"",
-    ""fish"":[{""tier"":""Common"", ""colorVariant"":""blue""}]
-  },
-  {
-    ""name"":""Budi"",
-    ""fish"":[{""tier"":""Epic"", ""colorVariant"":""green""}]
-  }
-]";
 
     private AquariumFish currentPlayerFish;
     private readonly List<AquariumFish> activeRandomFish = new List<AquariumFish>();
@@ -130,7 +88,7 @@ public class BigAquariumManager : MonoBehaviour
             return;
         }
 
-        // 1. Build fallback candidate pool so we always have >= 28 unique donors available for rotation
+        // 1. Build fallback candidate pool from centralized OfflineDummyData
         BuildDefaultCandidatePool();
 
         // 2. Spawn or update the 1 Permanent Current Player Fish
@@ -161,17 +119,11 @@ public class BigAquariumManager : MonoBehaviour
         rotationLoopCoroutine = StartCoroutine(PartialRotationLoop());
     }
 
-    /// <summary>
-    /// Dapat dipanggil dari UI atau Inspector untuk memaksa refresh data server sekarang juga.
-    /// </summary>
     public void RefreshNow()
     {
         FetchDonorPoolFromBackend();
     }
 
-    /// <summary>
-    /// Dapat dipanggil dari Inspector Context Menu untuk mengetes rotasi sebagian ikan secara langsung.
-    /// </summary>
     [ContextMenu("Trigger Partial Rotation Now")]
     public void TriggerPartialRotationNow()
     {
@@ -187,8 +139,8 @@ public class BigAquariumManager : MonoBehaviour
             ? BackendApiClient.Instance.DonorDisplayName
             : currentPlayerDefaultName;
 
-        string tier = playerFishData != null && !string.IsNullOrEmpty(playerFishData.tier) ? playerFishData.tier : "Common";
-        string color = playerFishData != null && !string.IsNullOrEmpty(playerFishData.colorVariant) ? playerFishData.colorVariant : "red";
+        string tier = playerFishData != null && !string.IsNullOrEmpty(playerFishData.tier) ? playerFishData.tier : OfflineDummyData.DEFAULT_PLAYER_TIER;
+        string color = playerFishData != null && !string.IsNullOrEmpty(playerFishData.colorVariant) ? playerFishData.colorVariant : OfflineDummyData.DEFAULT_PLAYER_COLOR;
         string accessory = playerFishData != null ? (playerFishData.selectedAccessoryId ?? "") : "";
 
         if (currentPlayerFish == null)
@@ -214,7 +166,6 @@ public class BigAquariumManager : MonoBehaviour
             currentPlayerFish.SetupFish(playerName, tier, color, accessory);
         }
 
-        // Also sync from backend if token is present so tier/color updates reflect
         PlayerDataRepository.SyncFromBackend(() =>
         {
             if (currentPlayerFish != null)
@@ -236,16 +187,11 @@ public class BigAquariumManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Replaces a small subset of activeRandomFish (never touching currentPlayerFish or the currently inspected fish).
-    /// Outgoing fish swim out beyond the boundary collider; replacement fish swim in from outside the boundary collider.
-    /// </summary>
     public void RotateSomeFish(int countToRotate)
     {
         activeRandomFish.RemoveAll(f => f == null);
         if (activeRandomFish.Count == 0) return;
 
-        // Collect eligible random fish (exclude current player fish, inspected fish, and already exiting fish)
         List<AquariumFish> eligible = new List<AquariumFish>();
         foreach (AquariumFish fish in activeRandomFish)
         {
@@ -267,7 +213,6 @@ public class BigAquariumManager : MonoBehaviour
             AquariumFish outgoingFish = eligible[pickIdx];
             eligible.RemoveAt(pickIdx);
 
-            // Remove from active list and command it to swim out past the collider
             activeRandomFish.Remove(outgoingFish);
             FishMovement outMov = outgoingFish.GetComponent<FishMovement>();
             if (outMov != null)
@@ -279,7 +224,6 @@ public class BigAquariumManager : MonoBehaviour
                 Destroy(outgoingFish.gameObject);
             }
 
-            // Spawn a new replacement fish outside the boundary collider that swims into the aquarium
             DonorFishProfile replacementProfile = GetNextUnusedCandidate();
             AquariumFish incomingFish = SpawnFishEnteringFromOutside(replacementProfile);
             if (incomingFish != null)
@@ -287,17 +231,10 @@ public class BigAquariumManager : MonoBehaviour
                 activeRandomFish.Add(incomingFish);
             }
         }
-
-        Debug.Log($"[BigAquariumManager] Rotasi bertahap: {actualRotateCount} ikan lama berenang keluar & {actualRotateCount} ikan baru berenang masuk. Ikan player tetap aman.");
     }
 
     // ───────────────────────────── 3. Search Lookup by Owner Name ─────────────────────────────
 
-    /// <summary>
-    /// Searches for a fish by owner name (case-insensitive).
-    /// Checks the 15 active fish in the aquarium first (Current Player + 14 Random).
-    /// If not currently in the tank but exists in the donor pool, rotates 1 fish out and swims the searched donor's fish in!
-    /// </summary>
     public AquariumFish FindOrBringInFishByName(string searchName)
     {
         if (string.IsNullOrWhiteSpace(searchName)) return null;
@@ -305,7 +242,7 @@ public class BigAquariumManager : MonoBehaviour
 
         activeRandomFish.RemoveAll(f => f == null);
 
-        // 1. Exact match among currently swimming fish (Current Player + 14 Random)
+        // 1. Exact match among currently swimming fish
         if (currentPlayerFish != null && MatchesNameExact(currentPlayerFish.OwnerName, query))
         {
             return currentPlayerFish;
@@ -337,7 +274,6 @@ public class BigAquariumManager : MonoBehaviour
 
         if (poolMatch != null)
         {
-            // Rotate 1 random fish out and bring the searched donor fish in from outside!
             if (activeRandomFish.Count >= Mathf.Max(1, maxFishLimit - 1))
             {
                 AquariumFish outgoing = activeRandomFish[0];
@@ -373,7 +309,7 @@ public class BigAquariumManager : MonoBehaviour
         return ownerName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
-    // ───────────────────────────── 4. Spawning Helpers (Inside vs Entering From Outside) ─────────────────────────────
+    // ───────────────────────────── 4. Spawning Helpers ─────────────────────────────
 
     private AquariumFish SpawnFishInsideAquarium(DonorFishProfile profile, bool isCurrentPlayer)
     {
@@ -418,14 +354,12 @@ public class BigAquariumManager : MonoBehaviour
         newFish.name = $"Fish_{profile.ownerName}";
         newFish.transform.SetAsLastSibling();
 
-        // Spawn outside either the left or right collider boundary
         bool enterFromLeft = UnityEngine.Random.value < 0.5f;
         float outsideMargin = 320f;
         float startX = enterFromLeft ? (rect.xMin - outsideMargin) : (rect.xMax + outsideMargin);
         float startY = UnityEngine.Random.Range(rect.yMin + 120f, rect.yMax - 120f);
         Vector2 outsideStartPos = new Vector2(startX, startY);
 
-        // Pick an entry target point well inside the aquarium
         float insideX = enterFromLeft
             ? UnityEngine.Random.Range(rect.xMin + 220f, rect.center.x)
             : UnityEngine.Random.Range(rect.center.x, rect.xMax - 220f);
@@ -485,7 +419,6 @@ public class BigAquariumManager : MonoBehaviour
                     if (dto == null || string.IsNullOrEmpty(dto.id)) continue;
                     string ownerName = !string.IsNullOrEmpty(dto.donorDisplayName) ? dto.donorDisplayName : "Anonymous Donor";
 
-                    // Skip current player so they are never duplicated in the random pool
                     if (string.Equals(ownerName, currentPlayerName, StringComparison.OrdinalIgnoreCase))
                         continue;
 
@@ -525,45 +458,16 @@ public class BigAquariumManager : MonoBehaviour
     {
         if (donorCandidatePool.Count > 0) return;
 
-        // Parse dummyJson first
-        List<PlayerFishData> fromJson = LoadDataFromJSON();
-        foreach (PlayerFishData p in fromJson)
+        List<OfflineDummyData.DummyDonorEntry> defaults = OfflineDummyData.GetDefaultDonorPool();
+        foreach (var entry in defaults)
         {
-            if (p == null || string.IsNullOrEmpty(p.name) || p.fish == null || p.fish.Count == 0) continue;
-            BigAquariumFishData f = p.fish[0];
             donorCandidatePool.Add(new DonorFishProfile
             {
-                id = $"pool_{p.name.ToLowerInvariant()}",
-                ownerName = p.name,
-                tier = !string.IsNullOrEmpty(f.tier) ? f.tier : "Common",
-                colorVariant = !string.IsNullOrEmpty(f.colorVariant) ? f.colorVariant : "blue",
-                accessoryId = f.accessoryId ?? ""
-            });
-        }
-
-        // Add diverse donor names so rotation always has fresh donors outside the 14 active ones
-        string[] sampleNames = {
-            "Rudi", "Eka", "Dewi", "Fajar", "Gita", "Hana", "Irfan", "Joko",
-            "Kiki", "Lani", "Maya", "Nico", "Rian", "Sari", "Bayu", "Dina",
-            "Reza", "Tono", "Putri", "Agus", "Nadia", "Dimas", "Rizky", "Ayu", "Bagas"
-        };
-        string[] sampleRarities = { "Common", "Rare", "Epic", "Legendary" };
-        string[] sampleColors = { "red", "blue", "green", "yellow" };
-        string[] sampleAccessories = { "", "hat_bigtop", "hat_cowboy", "glasses_fancy", "glasses_redsand", "hat_sailor", "glasses_starfish", "" };
-
-        for (int i = 0; i < sampleNames.Length; i++)
-        {
-            string name = sampleNames[i];
-            if (donorCandidatePool.Exists(p => string.Equals(p.ownerName, name, StringComparison.OrdinalIgnoreCase)))
-                continue;
-
-            donorCandidatePool.Add(new DonorFishProfile
-            {
-                id = $"pool_{name.ToLowerInvariant()}",
-                ownerName = name,
-                tier = sampleRarities[i % sampleRarities.Length],
-                colorVariant = sampleColors[i % sampleColors.Length],
-                accessoryId = sampleAccessories[i % sampleAccessories.Length]
+                id = entry.id,
+                ownerName = entry.ownerName,
+                tier = entry.tier,
+                colorVariant = entry.colorVariant,
+                accessoryId = entry.accessoryId
             });
         }
     }
@@ -575,7 +479,6 @@ public class BigAquariumManager : MonoBehaviour
             BuildDefaultCandidatePool();
         }
 
-        // Try to pick a candidate from donorCandidatePool that is not currently swimming in activeRandomFish
         for (int attempt = 0; attempt < donorCandidatePool.Count; attempt++)
         {
             int idx = (poolRotationCursor + attempt) % donorCandidatePool.Count;
@@ -591,24 +494,8 @@ public class BigAquariumManager : MonoBehaviour
             }
         }
 
-        // Fallback if all pool candidates are already swimming
         DonorFishProfile fallback = donorCandidatePool[poolRotationCursor % donorCandidatePool.Count];
         poolRotationCursor = (poolRotationCursor + 1) % donorCandidatePool.Count;
         return fallback;
-    }
-
-    private List<PlayerFishData> LoadDataFromJSON()
-    {
-        try
-        {
-            string wrappedJson = "{\"players\":" + dummyJson + "}";
-            AquariumDataWrapper wrapper = JsonUtility.FromJson<AquariumDataWrapper>(wrappedJson);
-            return (wrapper != null && wrapper.players != null) ? wrapper.players : new List<PlayerFishData>();
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[BigAquariumManager] Error parsing JSON: {e.Message}");
-            return new List<PlayerFishData>();
-        }
     }
 }

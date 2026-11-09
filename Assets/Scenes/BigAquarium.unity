@@ -3343,8 +3343,6 @@ MonoBehaviour:
   currentPlayerDefaultName: Pandu (Tel-U)
   rotationIntervalSeconds: 90
   fishRotatedPerCycle: 3
-  padWithDummyIfUnderMinimum: 1
-  dummyJson: 
 --- !u!4 &1582415852
 Transform:
   m_ObjectHideFlags: 0

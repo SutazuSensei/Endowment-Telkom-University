@@ -569,8 +569,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 227550658}
-  - component: {fileID: 227550660}
-  - component: {fileID: 227550659}
   - component: {fileID: 227550661}
   - component: {fileID: 227550662}
   - component: {fileID: 227550663}
@@ -592,8 +590,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1369284092}
+  m_Children: []
   m_Father: {fileID: 659389966}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -601,44 +598,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -22.000011}
   m_SizeDelta: {x: 448.8004, y: 240.4289}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &227550659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 227550657}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 62fe8f99886b5254094d33b746af28a2, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &227550660
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 227550657}
-  m_CullTransparentMesh: 1
 --- !u!114 &227550661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -690,210 +649,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0334a85133c994a43bcf22d9f2ffb770, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FishColorApplier
-  fishImage: {fileID: 227550659}
-  accessoryOverlayImage: {fileID: 1369284093}
-  fishSprites:
-  - tier: Common
-    colorVariant: red
-    fishSprite: {fileID: 21300000, guid: 62fe8f99886b5254094d33b746af28a2, type: 3}
-    customSize: {x: 200, y: 100}
-  - tier: Common
-    colorVariant: blue
-    fishSprite: {fileID: 21300000, guid: 071a1a9b07b20974fa09c36dcbd5f01a, type: 3}
-    customSize: {x: 200, y: 100}
-  - tier: Common
-    colorVariant: green
-    fishSprite: {fileID: 21300000, guid: c2b985679bbec1b4d9c85e21cce2beae, type: 3}
-    customSize: {x: 200, y: 100}
-  - tier: Common
-    colorVariant: yellow
-    fishSprite: {fileID: 21300000, guid: c690065146727ed488c424990af658e3, type: 3}
-    customSize: {x: 200, y: 100}
-  - tier: Rare
-    colorVariant: red
-    fishSprite: {fileID: 21300000, guid: 69f763a847cf88a4a853443990b75098, type: 3}
-    customSize: {x: 250, y: 125}
-  - tier: Rare
-    colorVariant: blue
-    fishSprite: {fileID: 21300000, guid: 95d64760e1c8a9c49a916f69c56b4097, type: 3}
-    customSize: {x: 250, y: 125}
-  - tier: Rare
-    colorVariant: green
-    fishSprite: {fileID: 21300000, guid: 7839aab58f85191439d197342c548ddd, type: 3}
-    customSize: {x: 250, y: 125}
-  - tier: Rare
-    colorVariant: yellow
-    fishSprite: {fileID: 21300000, guid: eb900da40e66461459d6743430485603, type: 3}
-    customSize: {x: 250, y: 125}
-  - tier: Epic
-    colorVariant: red
-    fishSprite: {fileID: 21300000, guid: b0264386691976248bc5c55caa522b9e, type: 3}
-    customSize: {x: 300, y: 150}
-  - tier: Epic
-    colorVariant: blue
-    fishSprite: {fileID: 21300000, guid: aeff418993d8d10488af8de25cef58c5, type: 3}
-    customSize: {x: 300, y: 150}
-  - tier: Epic
-    colorVariant: green
-    fishSprite: {fileID: 21300000, guid: 89f33f06118045147b60329b7e8de6f5, type: 3}
-    customSize: {x: 300, y: 150}
-  - tier: Epic
-    colorVariant: yellow
-    fishSprite: {fileID: 21300000, guid: c37d4399cbeeb844fa1a41f93b0a8349, type: 3}
-    customSize: {x: 300, y: 150}
-  - tier: Legendary
-    colorVariant: red
-    fishSprite: {fileID: 21300000, guid: e1f2195543ed99e4d86de199002917cc, type: 3}
-    customSize: {x: 400, y: 200}
-  - tier: Legendary
-    colorVariant: blue
-    fishSprite: {fileID: 21300000, guid: f40c5a60fddd1e347bccb94f7ac85399, type: 3}
-    customSize: {x: 400, y: 200}
-  - tier: Legendary
-    colorVariant: green
-    fishSprite: {fileID: 21300000, guid: 323dd8a67a571fa4fb69857dbec4d138, type: 3}
-    customSize: {x: 400, y: 200}
-  - tier: Legendary
-    colorVariant: yellow
-    fishSprite: {fileID: 21300000, guid: bc272399e66d5ea4cb8f658427de0530, type: 3}
-    customSize: {x: 400, y: 200}
-  accessories:
-  - accessoryId: 
-    accessorySprite: {fileID: 0}
-    placements: []
-  - accessoryId: hat_bigtop
-    accessorySprite: {fileID: 21300000, guid: d4437c182119e504ab683327e66d3b9d, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -74, y: 51.4}
-      scale: {x: 0.7, y: 0.7}
-      rotation: 0
-    - tier: Rare
-      offset: {x: -98.1, y: 43.5}
-      scale: {x: 0.79, y: 0.79}
-      rotation: 0
-    - tier: Epic
-      offset: {x: -128.2, y: 10.5}
-      scale: {x: 0.64, y: 0.64}
-      rotation: -4.29
-    - tier: Legendary
-      offset: {x: -156.5, y: 59.6}
-      scale: {x: 1, y: 1}
-      rotation: -9.16
-  - accessoryId: hat_cowboy
-    accessorySprite: {fileID: 21300000, guid: ebbb409fff4c1e04588aa9036c953417, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -65.6, y: 41.9}
-      scale: {x: 1, y: 1}
-      rotation: 5.73
-    - tier: Rare
-      offset: {x: -84.2, y: 31.3}
-      scale: {x: 1, y: 1}
-      rotation: 0
-    - tier: Epic
-      offset: {x: -124.5, y: -0.7}
-      scale: {x: 1, y: 1}
-      rotation: 0
-    - tier: Legendary
-      offset: {x: -143.5, y: 41.4}
-      scale: {x: 1, y: 1}
-      rotation: -3.89
-  - accessoryId: hat_sailor
-    accessorySprite: {fileID: 21300000, guid: aa5ecd27411602c479fa2f5e033fd4fb, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -66, y: 39.3}
-      scale: {x: 1, y: 1}
-      rotation: 0
-    - tier: Rare
-      offset: {x: -81.3, y: 35.8}
-      scale: {x: 1, y: 1}
-      rotation: -7.92
-    - tier: Epic
-      offset: {x: -117.9, y: -2.6}
-      scale: {x: 0.64, y: 0.64}
-      rotation: -13.47
-    - tier: Legendary
-      offset: {x: -130.8, y: 46.6}
-      scale: {x: 1, y: 1}
-      rotation: -12.68
-  - accessoryId: hat_unicorn
-    accessorySprite: {fileID: 21300000, guid: 57f39624190044b4a8d8f132973819ea, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -96.6, y: 50.3}
-      scale: {x: 0.79, y: 0.79}
-      rotation: 3.57
-    - tier: Rare
-      offset: {x: -117.9, y: 50.8}
-      scale: {x: 1, y: 1}
-      rotation: 6.88
-    - tier: Epic
-      offset: {x: -141.3, y: 6.1}
-      scale: {x: 0.6, y: 0.6}
-      rotation: 0
-    - tier: Legendary
-      offset: {x: -177.2, y: 59.9}
-      scale: {x: 1, y: 1}
-      rotation: 0
-  - accessoryId: EvilGlasses
-    accessorySprite: {fileID: 21300000, guid: 2e108746ca0a5ad4faf1fa20eb8d7a6f, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -63.6, y: 20.7}
-      scale: {x: 0.61, y: 0.61}
-      rotation: 3.57
-    - tier: Rare
-      offset: {x: -94.7, y: 7.9}
-      scale: {x: 0.67, y: 0.67}
-      rotation: 6.88
-    - tier: Epic
-      offset: {x: -129.4, y: -18.3}
-      scale: {x: 0.52, y: 0.52}
-      rotation: 0
-    - tier: Legendary
-      offset: {x: -123.4, y: 25.9}
-      scale: {x: 0.67, y: 0.67}
-      rotation: 0
-  - accessoryId: FancyGlasses
-    accessorySprite: {fileID: 21300000, guid: eebb1eca2d6b9c446b423b4441799a6c, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -61, y: 17}
-      scale: {x: 0.64, y: 0.64}
-      rotation: 3.57
-    - tier: Rare
-      offset: {x: -88.8, y: 10}
-      scale: {x: 0.61, y: 0.61}
-      rotation: 6.88
-    - tier: Epic
-      offset: {x: -125, y: -19.5}
-      scale: {x: 0.48, y: 0.48}
-      rotation: 0
-    - tier: Legendary
-      offset: {x: -119, y: 22.6}
-      scale: {x: 0.52, y: 0.52}
-      rotation: 0
-  - accessoryId: StarfishGlasses
-    accessorySprite: {fileID: 21300000, guid: 6540db152f34d714eac9ac9c042858fb, type: 3}
-    placements:
-    - tier: Common
-      offset: {x: -57.2, y: 15.1}
-      scale: {x: 0.58, y: 0.58}
-      rotation: 3.57
-    - tier: Rare
-      offset: {x: -88.3, y: 5.4}
-      scale: {x: 0.46, y: 0.46}
-      rotation: 6.88
-    - tier: Epic
-      offset: {x: -124.2, y: -21.3}
-      scale: {x: 0.27, y: 0.27}
-      rotation: 0
-    - tier: Legendary
-      offset: {x: -115.6, y: 19.5}
-      scale: {x: 0.52, y: 0.52}
-      rotation: 0
 --- !u!114 &227550663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,7 +661,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d61e6f5aafd1e44480d5bd46dffce50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fish3DView
-  fish3DPrefab: {fileID: 6624523024865215139, guid: dbd6d5d8e98a2c34fbb2552eb35956cd, type: 3}
+  fish3DPrefab: {fileID: 7020176606248558962, guid: 9531bd8f22a8c1346a4f7b867ad436ae, type: 3}
   hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
   glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
   baseWorldDepthFromCamera: 103.3
@@ -4174,81 +3929,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1343461295}
   m_CullTransparentMesh: 1
---- !u!1 &1369284091
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1369284092}
-  - component: {fileID: 1369284094}
-  - component: {fileID: 1369284093}
-  m_Layer: 5
-  m_Name: AccessoryHat
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1369284092
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1369284091}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 227550658}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1369284093
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1369284091}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1369284094
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1369284091}
-  m_CullTransparentMesh: 1
 --- !u!1 &1418395193
 GameObject:
   m_ObjectHideFlags: 0
@@ -6023,11 +5703,6 @@ MonoBehaviour:
   currentPlayerDefaultName: Pandu (Tel-U)
   rotationIntervalSeconds: 90
   fishRotatedPerCycle: 3
-  padWithDummyIfUnderMinimum: 0
-  dummyJson: "[\r\n  {\r\n    \"name\":\"Andi\",\r\n    \"fish\":[{\"tier\":\"Common\",
-    \"colorVariant\":\"red\"}]\r\n  },\r\n  {\r\n    \"name\":\"Siti\",\r\n    \"fish\":[{\"tier\":\"Common\",
-    \"colorVariant\":\"blue\"}]\r\n  },\r\n  {\r\n    \"name\":\"Budi\",\r\n    \"fish\":[{\"tier\":\"Epic\",
-    \"colorVariant\":\"green\"}]\r\n  }\r\n]"
 --- !u!1 &2016977908
 GameObject:
   m_ObjectHideFlags: 0
