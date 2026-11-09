@@ -3,7 +3,12 @@ guid: d7b6f330c68b4a9458dcfb80bc3f0adf
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Nemo_-_Tier_1_-_body
+    second: {fileID: 2100000, guid: 6dea182e188a7fb4695df55b897f0015, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

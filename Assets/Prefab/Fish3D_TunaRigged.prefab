@@ -57,7 +57,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8d95293896ade594a901fe3b62c952d0, type: 2}
+  - {fileID: 2100000, guid: ae18831dffa8efd45bd7365845ea043a, type: 2}
   - {fileID: 2100000, guid: 8d95293896ade594a901fe3b62c952d0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -202,6 +202,7 @@ MonoBehaviour:
   boneFinL2: {fileID: 5633323278734224804}
   boneFinR: {fileID: 3374208498321380536}
   boneFinR2: {fileID: 3542509678814211649}
+  targetAnimator: {fileID: 0}
 --- !u!1 &1821324173624960093
 GameObject:
   m_ObjectHideFlags: 0
