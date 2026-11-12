@@ -23,8 +23,8 @@ public class Fish3DView : MonoBehaviour
 
     [Header("3D Swimming Motion")]
     [SerializeField] private float turnSmoothTime = 0.26f;
-    [SerializeField] private float maxPitchAngle = 20f;
-    [SerializeField] private float pitchSmoothSpeed = 6f;
+    [SerializeField] private float maxPitchAngle = 8f;
+    [SerializeField] private float pitchSmoothSpeed = 8.5f;
     [SerializeField] private float swimYawSwayAmplitude = 3.5f;
     [SerializeField] private float swimYawSwayFrequency = 3.2f;
     [SerializeField] private float minAnimatorSpeed = 0.65f;
@@ -151,6 +151,30 @@ public class Fish3DView : MonoBehaviour
 
         Ensure3DInstance();
         ApplyVisualState();
+    }
+
+    /// <summary>
+    /// Updates the fish material colors immediately in real-time (e.g. while dragging ColorPicker)
+    /// without re-instantiating the model or causing GC allocations.
+    /// </summary>
+    public void SetLiveColor(Color color)
+    {
+        currentColorVariant = "#" + ColorUtility.ToHtmlStringRGB(color);
+        if (fish3DInstance == null) return;
+
+        if (fishPropBlock == null)
+            fishPropBlock = new MaterialPropertyBlock();
+
+        Renderer[] allRenderers = fish3DInstance.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer r in allRenderers)
+        {
+            if (hatSocket != null && r.transform.IsChildOf(hatSocket)) continue;
+            if (glassesSocket != null && r.transform.IsChildOf(glassesSocket)) continue;
+            r.GetPropertyBlock(fishPropBlock);
+            fishPropBlock.SetColor(FishColorID, color);
+            fishPropBlock.SetColor(BaseColorID, color);
+            r.SetPropertyBlock(fishPropBlock);
+        }
     }
 
     private void EnsureCameras()
@@ -461,13 +485,14 @@ public class Fish3DView : MonoBehaviour
         {
             facing = fishMovement.HeadingX;
             speedRatio = fishMovement.NormalizedSpeed;
-            verticalVelNorm = Mathf.Clamp(frameDelta.y / 140f, -1f, 1f);
+            // Clean, deliberate vertical slope (free from Perlin noise wobble)
+            verticalVelNorm = Mathf.Clamp(fishMovement.VerticalSlope, -1f, 1f);
         }
         else
         {
             facing = 1f;
             speedRatio = 0.35f;
-            verticalVelNorm = Mathf.Clamp(frameDelta.y / 40f, -0.5f, 0.5f);
+            verticalVelNorm = Mathf.Clamp(frameDelta.y / 60f, -0.5f, 0.5f);
         }
 
         float targetYaw = (facing >= 0f) ? 90f : 270f;
@@ -486,7 +511,8 @@ public class Fish3DView : MonoBehaviour
         float sway = Mathf.Sin(Time.time * swimYawSwayFrequency + randomPhase) *
                      swimYawSwayAmplitude * Mathf.Lerp(0.4f, 1.0f, speedRatio);
 
-        float targetPitch = -verticalVelNorm * maxPitchAngle * Mathf.Clamp01(speedRatio + 0.25f);
+        // Smooth pitch that returns cleanly to 0 when idle/gliding
+        float targetPitch = -verticalVelNorm * maxPitchAngle * Mathf.Clamp01(speedRatio);
         currentPitch = Mathf.Lerp(currentPitch, targetPitch, pitchSmoothSpeed * Time.deltaTime);
 
         float targetRoll = Mathf.Clamp(-yawVelocity * 0.045f, -14f, 14f);

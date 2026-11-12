@@ -61,6 +61,9 @@ public class BigAquariumManager : MonoBehaviour
     public AquariumFish CurrentPlayerFish => currentPlayerFish;
     public IReadOnlyList<AquariumFish> ActiveRandomFish => activeRandomFish;
 
+    public bool IsGuestSession => BackendApiClient.Instance != null && BackendApiClient.Instance.IsGuest;
+    public int TargetRandomFishCount => IsGuestSession ? maxFishLimit : Mathf.Max(1, maxFishLimit - 1);
+
     private void OnEnable()
     {
         InitializePopulationAndLoops();
@@ -91,12 +94,20 @@ public class BigAquariumManager : MonoBehaviour
         // 1. Build fallback candidate pool from centralized OfflineDummyData
         BuildDefaultCandidatePool();
 
-        // 2. Spawn or update the 1 Permanent Current Player Fish
-        EnsureCurrentPlayerFish();
+        // 2. Spawn or update the 1 Permanent Current Player Fish (donors only)
+        if (!IsGuestSession)
+        {
+            EnsureCurrentPlayerFish();
+        }
+        else if (currentPlayerFish != null)
+        {
+            Destroy(currentPlayerFish.gameObject);
+            currentPlayerFish = null;
+        }
 
-        // 3. Spawn initial 14 random fish inside the aquarium if not yet populated
+        // 3. Spawn initial random fish inside the aquarium (15 for guest, 14 for donor)
         activeRandomFish.RemoveAll(f => f == null);
-        int targetRandomCount = Mathf.Max(1, maxFishLimit - 1);
+        int targetRandomCount = TargetRandomFishCount;
         while (activeRandomFish.Count < targetRandomCount)
         {
             DonorFishProfile profile = GetNextUnusedCandidate();
@@ -134,6 +145,16 @@ public class BigAquariumManager : MonoBehaviour
 
     public void EnsureCurrentPlayerFish()
     {
+        if (IsGuestSession)
+        {
+            if (currentPlayerFish != null)
+            {
+                Destroy(currentPlayerFish.gameObject);
+                currentPlayerFish = null;
+            }
+            return;
+        }
+
         FishData playerFishData = PlayerDataRepository.GetPlayerFish();
         string playerName = BackendApiClient.Instance != null && !string.IsNullOrEmpty(BackendApiClient.Instance.DonorDisplayName)
             ? BackendApiClient.Instance.DonorDisplayName
@@ -274,7 +295,7 @@ public class BigAquariumManager : MonoBehaviour
 
         if (poolMatch != null)
         {
-            if (activeRandomFish.Count >= Mathf.Max(1, maxFishLimit - 1))
+            if (activeRandomFish.Count >= TargetRandomFishCount)
             {
                 AquariumFish outgoing = activeRandomFish[0];
                 activeRandomFish.RemoveAt(0);
@@ -412,14 +433,16 @@ public class BigAquariumManager : MonoBehaviour
         {
             if (data != null && data.fish != null && data.fish.Count > 0)
             {
-                string currentPlayerName = currentPlayerFish != null ? currentPlayerFish.OwnerName : currentPlayerDefaultName;
+                string currentPlayerName = (!IsGuestSession && currentPlayerFish != null)
+                    ? currentPlayerFish.OwnerName
+                    : (!IsGuestSession ? currentPlayerDefaultName : null);
 
                 foreach (PublicFishDTO dto in data.fish)
                 {
                     if (dto == null || string.IsNullOrEmpty(dto.id)) continue;
                     string ownerName = !string.IsNullOrEmpty(dto.donorDisplayName) ? dto.donorDisplayName : "Anonymous Donor";
 
-                    if (string.Equals(ownerName, currentPlayerName, StringComparison.OrdinalIgnoreCase))
+                    if (!string.IsNullOrEmpty(currentPlayerName) && string.Equals(ownerName, currentPlayerName, StringComparison.OrdinalIgnoreCase))
                         continue;
 
                     string clientTier = BackendContractMapper.ToClientTier(dto.tierCode);

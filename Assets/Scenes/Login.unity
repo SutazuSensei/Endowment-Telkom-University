@@ -658,6 +658,7 @@ GameObject:
   - component: {fileID: 653657673}
   - component: {fileID: 653657672}
   - component: {fileID: 653657671}
+  - component: {fileID: 653657675}
   m_Layer: 5
   m_Name: Canvas_Login
   m_TagString: Untagged
@@ -749,6 +750,27 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &653657675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 653657670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32075ad84ce5073439c67c4965005978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoginUIController
+  inputFieldIdentifier: {fileID: 713286016}
+  buttonLogin: {fileID: 1023307137}
+  buttonGuest: {fileID: 296328224}
+  textWarning: {fileID: 2120147479}
+  targetSceneName: MainMenu
+  emptyInputWarning: Please enter your full name or NIK.
+  notFoundWarning: Name or NIK not found in Endowment database.
+  networkErrorWarning: Server unreachable. You can continue as Guest.
+  loggingInText: Logging in...
 --- !u!1 &713286014
 GameObject:
   m_ObjectHideFlags: 0
@@ -1644,7 +1666,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Input your ID here...
+  m_text: Input your full name or NIK...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b52b1b262a3668847a6d7419abbaf4bb, type: 2}
   m_sharedMaterial: {fileID: -14396804969296233, guid: b52b1b262a3668847a6d7419abbaf4bb, type: 2}
@@ -2022,7 +2044,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2120147478
 RectTransform:
   m_ObjectHideFlags: 0

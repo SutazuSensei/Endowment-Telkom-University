@@ -190,11 +190,7 @@ public static class PlayerDataRepository
                         if (!string.IsNullOrEmpty(remoteFish.appearance.colorCode))
                             playerFish.colorVariant = BackendContractMapper.ToClientColorVariant(remoteFish.appearance.colorCode);
 
-                        string mappedAcc = BackendContractMapper.ToClientAccessoryId(remoteFish.appearance.accessoryCode);
-                        if (!string.IsNullOrEmpty(mappedAcc) || string.IsNullOrEmpty(playerFish.selectedAccessoryId))
-                        {
-                            playerFish.selectedAccessoryId = mappedAcc;
-                        }
+                        playerFish.selectedAccessoryId = BackendContractMapper.ToClientAccessoryId(remoteFish.appearance.accessoryCode);
                     }
 
                     Save();
@@ -203,6 +199,37 @@ public static class PlayerDataRepository
 
             onSynced?.Invoke();
         });
+    }
+
+    /// <summary>
+    /// Applies personal aquarium data received during login so playerFish is immediately up-to-date.
+    /// </summary>
+    public static void ApplyLoginAquariumData(PersonalAquariumDataDTO aquarium)
+    {
+        EnsureInitialized();
+        if (aquarium == null || aquarium.fish == null || aquarium.fish.Count == 0) return;
+
+        PersonalFishDTO active = aquarium.fish.Find(f => f.state != null && f.state.isActive)
+                                 ?? aquarium.fish[0];
+
+        if (active != null)
+        {
+            playerFish.fishId = active.id;
+            if (!string.IsNullOrEmpty(active.speciesCode))
+                playerFish.species = active.speciesCode;
+            if (!string.IsNullOrEmpty(active.tierCode))
+                playerFish.tier = BackendContractMapper.ToClientTier(active.tierCode);
+
+            if (active.appearance != null)
+            {
+                if (!string.IsNullOrEmpty(active.appearance.colorCode))
+                    playerFish.colorVariant = BackendContractMapper.ToClientColorVariant(active.appearance.colorCode);
+
+                playerFish.selectedAccessoryId = BackendContractMapper.ToClientAccessoryId(active.appearance.accessoryCode);
+            }
+
+            Save();
+        }
     }
 
     public static void SaveFishColor(string colorVariant)

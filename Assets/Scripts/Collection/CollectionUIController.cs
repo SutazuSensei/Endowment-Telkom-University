@@ -43,7 +43,11 @@ public class CollectionUIController : MonoBehaviour
     [Tooltip("Text element displaying fish information (species, tier, current color, etc.).")]
     [SerializeField] private TextMeshProUGUI fishInfoText;
 
-    [Header("Color Palette Configuration")]
+    [Header("Full Custom ColorPicker")]
+    [Tooltip("Reference to the full custom ColorPicker.")]
+    [SerializeField] private Endowment.UI.ColorPicker colorPicker;
+
+    [Header("Color Palette Configuration (Optional fallback/presets)")]
     [Tooltip("List of UI buttons for selecting color variants.")]
     [SerializeField] private ColorPaletteItem[] colorPalette;
 
@@ -123,6 +127,19 @@ public class CollectionUIController : MonoBehaviour
         if (showcaseFish3D != null)
         {
             showcaseFish3D.ApplyCustomization(data.tier, data.colorVariant, data.selectedAccessoryId);
+        }
+
+        if (colorPicker == null)
+        {
+            colorPicker = FindFirstObjectByType<Endowment.UI.ColorPicker>();
+        }
+
+        if (colorPicker != null && !string.IsNullOrEmpty(data.colorVariant))
+        {
+            if (colorPicker.CurrentHex != data.colorVariant)
+            {
+                colorPicker.SetColorFromHex(data.colorVariant, notifySave: false);
+            }
         }
 
         if (fishInfoText != null)

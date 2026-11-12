@@ -19,6 +19,8 @@ namespace Endowment.Network
     {
         private const string PREF_BEARER_TOKEN = "endowment_bearer_token";
         private const string PREF_ACTIVE_FISH_ID = "endowment_active_fish_id";
+        private const string PREF_DONOR_EXTERNAL_ID = "endowment_donor_external_id";
+        private const string PREF_DONOR_DISPLAY_NAME = "endowment_donor_display_name";
 
         private static BackendApiClient instance;
 
@@ -49,7 +51,7 @@ namespace Endowment.Network
 
         [Header("Authentication & Testing")]
         [Tooltip("Optional developer Bearer token for Personal Aquarium routes (/api/v1/me/*).")]
-        [SerializeField] private string devBearerToken = "klSIM1rLCNw0Ard-8o3r6_R38yNazVsffAk7ZIc3Ces";
+        [SerializeField] private string devBearerToken = "";
 
         [Tooltip("External ID of the developer donor for testing mock donations.")]
         [SerializeField] private string devDonorExternalId = "donor-pandu-dev";
@@ -71,10 +73,34 @@ namespace Endowment.Network
         public string MockApiBaseUrl => mockApiBaseUrl.TrimEnd('/');
         public bool IsServerReachable => isServerReachable;
 
-        public string DonorExternalId => !string.IsNullOrEmpty(devDonorExternalId) ? devDonorExternalId : "donor-pandu-dev";
-        public string DonorDisplayName => !string.IsNullOrEmpty(devDonorDisplayName) ? devDonorDisplayName : OfflineDummyData.DEFAULT_PLAYER_NAME;
+        public string DonorExternalId
+        {
+            get
+            {
+                if (PlayerPrefs.HasKey(PREF_DONOR_EXTERNAL_ID))
+                {
+                    string saved = PlayerPrefs.GetString(PREF_DONOR_EXTERNAL_ID, "");
+                    if (!string.IsNullOrEmpty(saved)) return saved;
+                }
+                return !string.IsNullOrEmpty(devDonorExternalId) ? devDonorExternalId : "donor-pandu-dev";
+            }
+        }
+
+        public string DonorDisplayName
+        {
+            get
+            {
+                if (PlayerPrefs.HasKey(PREF_DONOR_DISPLAY_NAME))
+                {
+                    string saved = PlayerPrefs.GetString(PREF_DONOR_DISPLAY_NAME, "");
+                    if (!string.IsNullOrEmpty(saved)) return saved;
+                }
+                return !string.IsNullOrEmpty(devDonorDisplayName) ? devDonorDisplayName : OfflineDummyData.DEFAULT_PLAYER_NAME;
+            }
+        }
 
         public bool HasBearerToken => !string.IsNullOrEmpty(GetBearerToken());
+        public bool IsGuest => !HasBearerToken || string.Equals(DonorExternalId, "guest", StringComparison.OrdinalIgnoreCase);
 
         public string ActiveFishId
         {
@@ -115,33 +141,41 @@ namespace Endowment.Network
                 return;
             }
 
-            if (!string.IsNullOrEmpty(devBearerToken))
+            if (PlayerPrefs.HasKey(PREF_BEARER_TOKEN))
+            {
+                runtimeBearerToken = PlayerPrefs.GetString(PREF_BEARER_TOKEN, "");
+            }
+            else if (!string.IsNullOrEmpty(devBearerToken))
             {
                 runtimeBearerToken = devBearerToken.Trim();
                 PlayerPrefs.SetString(PREF_BEARER_TOKEN, runtimeBearerToken);
                 PlayerPrefs.Save();
-                return;
             }
 
-            if (PlayerPrefs.HasKey(PREF_BEARER_TOKEN))
+            if (PlayerPrefs.HasKey(PREF_DONOR_EXTERNAL_ID))
             {
-                runtimeBearerToken = PlayerPrefs.GetString(PREF_BEARER_TOKEN, "");
+                devDonorExternalId = PlayerPrefs.GetString(PREF_DONOR_EXTERNAL_ID, "");
+            }
+            if (PlayerPrefs.HasKey(PREF_DONOR_DISPLAY_NAME))
+            {
+                devDonorDisplayName = PlayerPrefs.GetString(PREF_DONOR_DISPLAY_NAME, "");
             }
         }
 
         public string GetBearerToken()
         {
-            if (!string.IsNullOrEmpty(devBearerToken))
-                return devBearerToken.Trim();
-
             if (!string.IsNullOrEmpty(runtimeBearerToken))
                 return runtimeBearerToken.Trim();
 
             if (PlayerPrefs.HasKey(PREF_BEARER_TOKEN))
             {
                 runtimeBearerToken = PlayerPrefs.GetString(PREF_BEARER_TOKEN, "");
-                return runtimeBearerToken;
+                if (!string.IsNullOrEmpty(runtimeBearerToken))
+                    return runtimeBearerToken.Trim();
             }
+
+            if (!string.IsNullOrEmpty(devBearerToken))
+                return devBearerToken.Trim();
 
             return "";
         }
@@ -154,9 +188,73 @@ namespace Endowment.Network
             PlayerPrefs.Save();
         }
 
+        public void SetDonorIdentity(string externalId, string displayName)
+        {
+            devDonorExternalId = (externalId ?? "").Trim();
+            devDonorDisplayName = (displayName ?? "").Trim();
+            PlayerPrefs.SetString(PREF_DONOR_EXTERNAL_ID, devDonorExternalId);
+            PlayerPrefs.SetString(PREF_DONOR_DISPLAY_NAME, devDonorDisplayName);
+            PlayerPrefs.Save();
+        }
+
+        public void ClearAuthSession()
+        {
+            runtimeBearerToken = "";
+            devBearerToken = "";
+            devDonorExternalId = "guest";
+            devDonorDisplayName = OfflineDummyData.DEFAULT_PLAYER_NAME;
+            cachedActiveFishId = "";
+            PlayerPrefs.DeleteKey(PREF_BEARER_TOKEN);
+            PlayerPrefs.DeleteKey(PREF_DONOR_EXTERNAL_ID);
+            PlayerPrefs.DeleteKey(PREF_DONOR_DISPLAY_NAME);
+            PlayerPrefs.DeleteKey(PREF_ACTIVE_FISH_ID);
+            PlayerPrefs.Save();
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Public API Methods
         // ─────────────────────────────────────────────────────────────────────
+
+        public void Login(string identifier, Action<LoginDataDTO, ApiErrorDTO> onComplete)
+        {
+            string url = $"{GameApiBaseUrl}/api/v1/auth/login";
+            string jsonBody = JsonUtility.ToJson(new LoginRequestDTO { identifier = identifier });
+
+            StartCoroutine(SendJsonRequest(url, "POST", jsonBody, false, (status, body, netErr) =>
+            {
+                if (netErr)
+                {
+                    onComplete?.Invoke(null, CreateNetworkError());
+                    return;
+                }
+
+                if (status >= 200 && status < 300)
+                {
+                    var env = SafeFromJson<LoginEnvelopeDTO>(body);
+                    if (env != null && env.data != null)
+                    {
+                        SetBearerToken(env.data.accessToken);
+                        if (env.data.donor != null)
+                        {
+                            SetDonorIdentity(env.data.donor.externalId, env.data.donor.displayName);
+                        }
+                        if (env.data.aquarium != null && env.data.aquarium.fish != null && env.data.aquarium.fish.Count > 0)
+                        {
+                            PersonalFishDTO active = env.data.aquarium.fish.Find(f => f.state != null && f.state.isActive)
+                                                     ?? env.data.aquarium.fish[0];
+                            if (active != null && !string.IsNullOrEmpty(active.id))
+                            {
+                                ActiveFishId = active.id;
+                            }
+                        }
+                        onComplete?.Invoke(env.data, null);
+                        return;
+                    }
+                }
+
+                onComplete?.Invoke(null, ParseApiError(body, status));
+            }));
+        }
 
         public void CheckHealth(Action<bool> onComplete)
         {

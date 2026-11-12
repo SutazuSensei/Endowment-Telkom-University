@@ -90,6 +90,39 @@ namespace Endowment.Network
         public AuthExchangeDataDTO data;
     }
 
+    [Serializable]
+    public class LoginRequestDTO
+    {
+        public string identifier;
+    }
+
+    [Serializable]
+    public class DonorProfileDTO
+    {
+        public string id;
+        public string externalId;
+        public string displayName;
+        public string email;
+    }
+
+    [Serializable]
+    public class LoginDataDTO
+    {
+        public string accessToken;
+        public string tokenType;
+        public string expiresAt;
+        public DonorProfileDTO donor;
+        public PersonalAquariumDataDTO aquarium;
+    }
+
+    [Serializable]
+    public class LoginEnvelopeDTO
+    {
+        public string schemaVersion;
+        public string requestId;
+        public LoginDataDTO data;
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Fish Models (Personal & Public)
     // ─────────────────────────────────────────────────────────────────────────
@@ -315,12 +348,14 @@ namespace Endowment.Network
         }
 
         /// <summary>
-        /// Converts backend colorCode ('DEFAULT', 'OCEAN_BLUE', 'CORAL_PINK', 'GOLDEN')
-        /// to Unity client colorVariant ('blue', 'red', 'yellow', 'green').
+        /// Converts backend colorCode ('DEFAULT', 'OCEAN_BLUE', 'CORAL_PINK', 'GOLDEN', or hex '#RRGGBB')
+        /// to Unity client colorVariant ('blue', 'red', 'yellow', 'green', or hex '#RRGGBB').
         /// </summary>
         public static string ToClientColorVariant(string backendColorCode)
         {
             if (string.IsNullOrEmpty(backendColorCode)) return "blue";
+
+            if (backendColorCode.StartsWith("#")) return backendColorCode;
 
             switch (backendColorCode.Trim().ToUpperInvariant())
             {
@@ -328,17 +363,19 @@ namespace Endowment.Network
                 case "OCEAN_BLUE": return "blue";
                 case "CORAL_PINK": return "red";
                 case "GOLDEN": return "yellow";
-                default: return backendColorCode.Trim().ToLowerInvariant();
+                default: return backendColorCode.Trim();
             }
         }
 
         /// <summary>
-        /// Converts Unity client colorVariant ('red', 'blue', 'yellow', 'green')
-        /// to valid backend colorCode ('DEFAULT', 'OCEAN_BLUE', 'CORAL_PINK', 'GOLDEN').
+        /// Converts Unity client colorVariant ('red', 'blue', 'yellow', 'green', or hex '#RRGGBB')
+        /// to valid backend colorCode ('DEFAULT', 'OCEAN_BLUE', 'CORAL_PINK', 'GOLDEN', or hex '#RRGGBB').
         /// </summary>
         public static string ToBackendColorCode(string clientColorVariant)
         {
             if (string.IsNullOrEmpty(clientColorVariant)) return "DEFAULT";
+
+            if (clientColorVariant.StartsWith("#")) return clientColorVariant;
 
             switch (clientColorVariant.Trim().ToLowerInvariant())
             {
@@ -357,13 +394,13 @@ namespace Endowment.Network
                 case "default":
                     return "DEFAULT";
                 default:
-                    return "DEFAULT";
+                    return clientColorVariant;
             }
         }
 
         /// <summary>
-        /// Converts backend accessoryCode ('NONE', 'TELU_CAP', 'GRADUATION_HAT')
-        /// to Unity client accessoryId ('', 'hat_cowboy', 'hat_bigtop').
+        /// Converts backend accessoryCode ('NONE', 'TELU_CAP', 'GRADUATION_HAT', or client ID like 'glasses_fancy')
+        /// to Unity client accessoryId ('', 'hat_cowboy', 'hat_bigtop', or exact ID).
         /// </summary>
         public static string ToClientAccessoryId(string backendAccessoryCode)
         {
@@ -384,24 +421,16 @@ namespace Endowment.Network
 
         /// <summary>
         /// Converts Unity client accessoryId ('hat_bigtop', 'hat_cowboy', 'glasses_fancy', etc.)
-        /// to valid backend accessoryCode ('NONE', 'TELU_CAP', 'GRADUATION_HAT').
+        /// to valid backend accessoryCode ('NONE' or exact accessoryId).
         /// </summary>
         public static string ToBackendAccessoryCode(string clientAccessoryId)
         {
             if (string.IsNullOrEmpty(clientAccessoryId)) return "NONE";
 
             string lower = clientAccessoryId.Trim().ToLowerInvariant();
-            if (lower == "none") return "NONE";
-            if (lower == "telu_cap") return "TELU_CAP";
-            if (lower == "graduation_hat") return "GRADUATION_HAT";
+            if (lower == "none" || lower == "") return "NONE";
 
-            if (lower.Contains("bigtop") || lower.Contains("unicorn") || lower.Contains("graduation"))
-                return "GRADUATION_HAT";
-
-            if (lower.Contains("hat") || lower.Contains("cap") || lower.Contains("glass") || lower.Contains("starfish"))
-                return "TELU_CAP";
-
-            return "NONE";
+            return lower;
         }
     }
 }

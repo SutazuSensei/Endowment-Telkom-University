@@ -198,12 +198,12 @@ MonoBehaviour:
   eatingDuration: 1.5
   mouthOffset: {x: 105, y: 0}
   foodArrivalThreshold: 30
-  wobbleAmplitude: 20
-  wobbleFrequency: 1.2
+  wobbleAmplitude: 6
+  wobbleFrequency: 0.9
   idleDurationMin: 0.5
   idleDurationMax: 2.5
   idleChance: 0.35
-  idleBobAmplitude: 3
+  idleBobAmplitude: 2
   idleBobSpeed: 1.5
   invertSpriteFacing: 1
   flipSpeed: 5
@@ -248,8 +248,8 @@ MonoBehaviour:
   scaleMultiplier: 0.85
   referenceCameraOrthoSize: 81.42
   turnSmoothTime: 0.26
-  maxPitchAngle: 20
-  pitchSmoothSpeed: 6
+  maxPitchAngle: 8
+  pitchSmoothSpeed: 8.5
   swimYawSwayAmplitude: 3.5
   swimYawSwayFrequency: 3.2
   minAnimatorSpeed: 0.65

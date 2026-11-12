@@ -59,10 +59,10 @@ public class FishMovement : MonoBehaviour
 
     [Header("Swimming Feel")]
     [Tooltip("How far the fish wobbles perpendicular to its path (pixels).")]
-    [SerializeField] private float wobbleAmplitude = 20f;
+    [SerializeField] private float wobbleAmplitude = 6f;
 
     [Tooltip("How quickly the wobble oscillates. Higher = faster shimmy.")]
-    [SerializeField] private float wobbleFrequency = 1.2f;
+    [SerializeField] private float wobbleFrequency = 0.9f;
 
     [Header("Idle Behavior")]
     [Tooltip("Minimum idle duration in seconds.")]
@@ -75,7 +75,7 @@ public class FishMovement : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float idleChance = 0.35f;
 
     [Tooltip("Vertical bobbing amplitude while idle (pixels).")]
-    [SerializeField] private float idleBobAmplitude = 3f;
+    [SerializeField] private float idleBobAmplitude = 2f;
 
     [Tooltip("Vertical bobbing speed while idle.")]
     [SerializeField] private float idleBobSpeed = 1.5f;
@@ -168,6 +168,12 @@ public class FishMovement : MonoBehaviour
     public float TargetFacing => targetFacing;
     public float HeadingX => currentHeadingX;
     public float NormalizedSpeed => (moveSpeedMax > 0.01f) ? Mathf.Clamp01(currentSpeed / moveSpeedMax) : 0f;
+
+    /// <summary>
+    /// Clean, deliberate vertical slope of travel (-1 to +1) without Perlin wobble noise.
+    /// Used by Fish3DView for smooth, natural 3D pitch without twitching.
+    /// </summary>
+    public float VerticalSlope => (state == FishState.Swimming || state == FishState.Accelerating || state == FishState.Decelerating || state == FishState.Entering || state == FishState.Exiting) ? lastMoveDirection.y : 0f;
 
     // ───────────────────────────── Unity Lifecycle ─────────────────────────────
 

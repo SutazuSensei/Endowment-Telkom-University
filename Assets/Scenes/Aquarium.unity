@@ -619,12 +619,12 @@ MonoBehaviour:
   eatingDuration: 1.5
   mouthOffset: {x: 105, y: 0}
   foodArrivalThreshold: 30
-  wobbleAmplitude: 20
-  wobbleFrequency: 1.2
+  wobbleAmplitude: 6
+  wobbleFrequency: 0.9
   idleDurationMin: 0.5
   idleDurationMax: 2.5
   idleChance: 0.35
-  idleBobAmplitude: 3
+  idleBobAmplitude: 2
   idleBobSpeed: 1.5
   invertSpriteFacing: 1
   flipSpeed: 5
@@ -668,8 +668,8 @@ MonoBehaviour:
   scaleMultiplier: 1
   referenceCameraOrthoSize: 81.42
   turnSmoothTime: 0.26
-  maxPitchAngle: 20
-  pitchSmoothSpeed: 6
+  maxPitchAngle: 8
+  pitchSmoothSpeed: 8.5
   swimYawSwayAmplitude: 3.5
   swimYawSwayFrequency: 3.2
   minAnimatorSpeed: 0.65
@@ -948,123 +948,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 480216105}
   m_CullTransparentMesh: 1
---- !u!1001 &488822011
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1954683994}
-    m_Modifications:
-    - target: {fileID: 1653783923234679295, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_Name
-      value: Btn_bigAquarium
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 108
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 108
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 960.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 95
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8654746937585851564, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: 7e79a5bbedfab421aac7a1fa2c205ee9, type: 3}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
---- !u!224 &488822012 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1960263725136678744, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-  m_PrefabInstance: {fileID: 488822011}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &488822013 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6830788301342404771, guid: b7c483567227a4ab3a3284a0da6a99ad, type: 3}
-  m_PrefabInstance: {fileID: 488822011}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &507331345
 GameObject:
   m_ObjectHideFlags: 0
@@ -2399,7 +2282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AquariumZoomModeController
   cameraZoomTransition: {fileID: 833784998}
-  btnBigAquarium: {fileID: 488822013}
+  btnBigAquarium: {fileID: 0}
   btnSmallAquarium: {fileID: 588520612}
   bigAquariumObjects:
   - {fileID: 2014634379}
@@ -5322,6 +5205,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1888101377}
   m_CullTransparentMesh: 1
+--- !u!1 &1895013315
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1895013317}
+  - component: {fileID: 1895013316}
+  m_Layer: 0
+  m_Name: Security_SceneGuestGuard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1895013316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1895013315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c813808a54f9584185b1d1ad2c67c59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Endowment.Gameplay.SceneGuestGuard
+  fallbackSceneName: MainMenu
+--- !u!4 &1895013317
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1895013315}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1901026601
 GameObject:
   m_ObjectHideFlags: 0
@@ -5565,7 +5493,6 @@ RectTransform:
   - {fileID: 833938475}
   - {fileID: 1830786120}
   - {fileID: 862482910}
-  - {fileID: 488822012}
   - {fileID: 588520611}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6077,3 +6004,4 @@ SceneRoots:
   - {fileID: 1552968794}
   - {fileID: 637716021}
   - {fileID: 833784996}
+  - {fileID: 1895013317}
