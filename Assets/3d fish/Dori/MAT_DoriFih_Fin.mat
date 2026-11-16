@@ -82,7 +82,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _fish_mask:
-        m_Texture: {fileID: 2800000, guid: 570dd4f411a48664796e9be46c0e7fee, type: 3}
+        m_Texture: {fileID: 2800000, guid: b72ceb72bc0045945b8f9e592cddb701, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _fish_texture:
