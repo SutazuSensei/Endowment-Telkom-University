@@ -192,6 +192,7 @@ public class BigAquariumSearchController : MonoBehaviour
         }
 
         UpdateInspectLabels();
+        targetFish.PlayInspectBurst();
     }
 
     private void UpdateInspectLabels()
@@ -205,7 +206,13 @@ public class BigAquariumSearchController : MonoBehaviour
 
         if (inspectTierText != null)
         {
-            inspectTierText.text = $"Tier: {inspectedFish.FishRarity}";
+            string rarity = inspectedFish.FishRarity ?? "Common";
+            string lower = rarity.ToLowerInvariant();
+            string hex = "#FFFFFF";
+            if (lower.Contains("rare") || lower.Contains("tier2")) hex = "#5CD6FF";
+            else if (lower.Contains("epic") || lower.Contains("tier3")) hex = "#D07AFF";
+            else if (lower.Contains("legendary") || lower.Contains("tier4")) hex = "#FFD23F";
+            inspectTierText.text = $"Tier: <color={hex}><b>{rarity}</b></color>";
         }
     }
 

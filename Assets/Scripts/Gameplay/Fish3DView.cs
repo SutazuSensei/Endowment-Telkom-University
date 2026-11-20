@@ -50,8 +50,21 @@ public class Fish3DView : MonoBehaviour
 
     private MaterialPropertyBlock fishPropBlock;
     private MaterialPropertyBlock accPropBlock;
+    private FishTierVFX tierVFX;
     private static readonly int FishColorID = Shader.PropertyToID("_FishColor");
     private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
+    private static readonly int SmoothnessID = Shader.PropertyToID("_Smoothness");
+    private static readonly int MetallicID = Shader.PropertyToID("_Metallic");
+    private static readonly int RimColorID = Shader.PropertyToID("_RimColor");
+    private static readonly int RimPowerID = Shader.PropertyToID("_RimPower");
+    private static readonly int RimIntensityID = Shader.PropertyToID("_RimIntensity");
+    private static readonly int GlowColorID = Shader.PropertyToID("_GlowColor");
+    private static readonly int GlowStrengthID = Shader.PropertyToID("_GlowStrength");
+    private static readonly int MaskGlowWeightID = Shader.PropertyToID("_MaskGlowWeight");
+    private static readonly int PulseSpeedID = Shader.PropertyToID("_PulseSpeed");
+    private static readonly int IridescenceStrengthID = Shader.PropertyToID("_IridescenceStrength");
+    private static readonly int ShineSpeedID = Shader.PropertyToID("_ShineSpeed");
+    private static readonly int ShineStrengthID = Shader.PropertyToID("_ShineStrength");
 
     private string currentTier = "Common";
     private string currentColorVariant = "blue";
@@ -154,6 +167,17 @@ public class Fish3DView : MonoBehaviour
     }
 
     /// <summary>
+    /// Triggers a celebratory bubble/sparkle burst on the fish (e.g. when fed or inspected).
+    /// </summary>
+    public void PlaySpecialBurst(bool isFeed = false)
+    {
+        if (tierVFX != null)
+        {
+            tierVFX.PlayBurst(isFeed);
+        }
+    }
+
+    /// <summary>
     /// Updates the fish material colors immediately in real-time (e.g. while dragging ColorPicker)
     /// without re-instantiating the model or causing GC allocations.
     /// </summary>
@@ -162,19 +186,7 @@ public class Fish3DView : MonoBehaviour
         currentColorVariant = "#" + ColorUtility.ToHtmlStringRGB(color);
         if (fish3DInstance == null) return;
 
-        if (fishPropBlock == null)
-            fishPropBlock = new MaterialPropertyBlock();
-
-        Renderer[] allRenderers = fish3DInstance.GetComponentsInChildren<Renderer>(true);
-        foreach (Renderer r in allRenderers)
-        {
-            if (hatSocket != null && r.transform.IsChildOf(hatSocket)) continue;
-            if (glassesSocket != null && r.transform.IsChildOf(glassesSocket)) continue;
-            r.GetPropertyBlock(fishPropBlock);
-            fishPropBlock.SetColor(FishColorID, color);
-            fishPropBlock.SetColor(BaseColorID, color);
-            r.SetPropertyBlock(fishPropBlock);
-        }
+        ApplyColorAndTierShader(color);
     }
 
     private void EnsureCameras()
@@ -266,23 +278,27 @@ public class Fish3DView : MonoBehaviour
             glassesInstance.transform.localScale = Vector3.one;
             glassesInstance.SetActive(false);
         }
+
+        tierVFX = fish3DInstance.GetComponent<FishTierVFX>();
+        if (tierVFX == null)
+        {
+            tierVFX = fish3DInstance.AddComponent<FishTierVFX>();
+        }
+        EnsureCameras();
+        tierVFX.EnsureInitialized(cam3D);
     }
 
     private void ApplyVisualState()
     {
         if (fish3DInstance == null) return;
 
-        // 1. Apply Shader Color (_FishColor / _BaseColor) via MaterialPropertyBlock
+        // 1. Apply Shader Color (_FishColor / _BaseColor) & Tier Effects via MaterialPropertyBlock
         Color targetColor = ResolveFishColor(currentColorVariant);
-        Renderer[] allRenderers = fish3DInstance.GetComponentsInChildren<Renderer>(true);
-        foreach (Renderer r in allRenderers)
+        ApplyColorAndTierShader(targetColor);
+
+        if (tierVFX != null)
         {
-            if (hatSocket != null && r.transform.IsChildOf(hatSocket)) continue;
-            if (glassesSocket != null && r.transform.IsChildOf(glassesSocket)) continue;
-            r.GetPropertyBlock(fishPropBlock);
-            fishPropBlock.SetColor(FishColorID, targetColor);
-            fishPropBlock.SetColor(BaseColorID, targetColor);
-            r.SetPropertyBlock(fishPropBlock);
+            tierVFX.ApplyTier(currentTier, targetColor, GetCurrentVFXScale());
         }
 
         // 2. Apply 3D Accessory (Top Hat or Glasses) attached to socket
@@ -309,6 +325,135 @@ public class Fish3DView : MonoBehaviour
 
         if (hatInstance != null) hatInstance.SetActive(showHat);
         if (glassesInstance != null) glassesInstance.SetActive(showGlasses);
+    }
+
+    private void ApplyColorAndTierShader(Color targetColor)
+    {
+        if (fish3DInstance == null) return;
+        if (fishPropBlock == null) fishPropBlock = new MaterialPropertyBlock();
+
+        GetTierShaderSettings(
+            currentTier, targetColor,
+            out float smoothness, out float metallic,
+            out Color rimColor, out float rimPower, out float rimIntensity,
+            out Color glowColor, out float glowStrength, out float maskGlowWeight, out float pulseSpeed,
+            out float iridescence, out float shineSpeed, out float shineStrength);
+
+        Renderer[] allRenderers = fish3DInstance.GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer r in allRenderers)
+        {
+            if (hatSocket != null && r.transform.IsChildOf(hatSocket)) continue;
+            if (glassesSocket != null && r.transform.IsChildOf(glassesSocket)) continue;
+            if (tierVFX != null && r.transform.IsChildOf(tierVFX.transform))
+            {
+                if (r.name.StartsWith("VFX_")) continue;
+            }
+
+            r.GetPropertyBlock(fishPropBlock);
+            fishPropBlock.SetColor(FishColorID, targetColor);
+            fishPropBlock.SetColor(BaseColorID, targetColor);
+            fishPropBlock.SetFloat(SmoothnessID, smoothness);
+            fishPropBlock.SetFloat(MetallicID, metallic);
+            fishPropBlock.SetColor(RimColorID, rimColor);
+            fishPropBlock.SetFloat(RimPowerID, rimPower);
+            fishPropBlock.SetFloat(RimIntensityID, rimIntensity);
+            fishPropBlock.SetColor(GlowColorID, glowColor);
+            fishPropBlock.SetFloat(GlowStrengthID, glowStrength);
+            fishPropBlock.SetFloat(MaskGlowWeightID, maskGlowWeight);
+            fishPropBlock.SetFloat(PulseSpeedID, pulseSpeed);
+            fishPropBlock.SetFloat(IridescenceStrengthID, iridescence);
+            fishPropBlock.SetFloat(ShineSpeedID, shineSpeed);
+            fishPropBlock.SetFloat(ShineStrengthID, shineStrength);
+            r.SetPropertyBlock(fishPropBlock);
+        }
+    }
+
+    private static void GetTierShaderSettings(
+        string tier, Color baseColor,
+        out float smoothness, out float metallic,
+        out Color rimColor, out float rimPower, out float rimIntensity,
+        out Color glowColor, out float glowStrength, out float maskGlowWeight, out float pulseSpeed,
+        out float iridescence, out float shineSpeed, out float shineStrength)
+    {
+        string lower = string.IsNullOrEmpty(tier) ? "common" : tier.Trim().ToLowerInvariant();
+        if (lower == "rare" || lower == "tier2" || lower == "tier 2")
+        {
+            smoothness = 0.65f;
+            metallic = 0.08f;
+            rimColor = Color.Lerp(baseColor, new Color(0.55f, 0.92f, 1.0f, 1f), 0.72f);
+            rimPower = 3.6f;
+            rimIntensity = 0.55f;
+            glowColor = new Color(0.4f, 0.9f, 1f, 1f);
+            glowStrength = 0.0f;
+            maskGlowWeight = 0.6f;
+            pulseSpeed = 1.8f;
+            iridescence = 0.18f;
+            shineSpeed = 0.35f;
+            shineStrength = 0.45f;
+        }
+        else if (lower == "epic" || lower == "tier3" || lower == "tier 3")
+        {
+            smoothness = 0.76f;
+            metallic = 0.16f;
+            rimColor = Color.Lerp(baseColor, new Color(0.72f, 0.48f, 1.0f, 1f), 0.58f);
+            rimPower = 3.0f;
+            rimIntensity = 1.45f;
+            glowColor = Color.Lerp(baseColor, new Color(0.55f, 0.90f, 1.0f, 1f), 0.45f);
+            glowStrength = 0.38f;
+            maskGlowWeight = 0.55f;
+            pulseSpeed = 2.2f;
+            iridescence = 0.42f;
+            shineSpeed = 0.55f;
+            shineStrength = 0.75f;
+        }
+        else if (lower == "legendary" || lower == "tier4" || lower == "tier 4")
+        {
+            smoothness = 0.88f;
+            metallic = 0.30f;
+            rimColor = Color.Lerp(baseColor, new Color(1.0f, 0.85f, 0.25f, 1f), 0.75f);
+            rimPower = 2.6f;
+            rimIntensity = 2.30f;
+            glowColor = Color.Lerp(baseColor, new Color(1.0f, 0.82f, 0.30f, 1f), 0.55f);
+            glowStrength = 0.55f;
+            maskGlowWeight = 0.60f;
+            pulseSpeed = 2.8f;
+            iridescence = 0.72f;
+            shineSpeed = 0.75f;
+            shineStrength = 1.20f;
+        }
+        else
+        {
+            smoothness = 0.45f;
+            metallic = 0.0f;
+            rimColor = Color.white;
+            rimPower = 4.0f;
+            rimIntensity = 0.0f;
+            glowColor = Color.black;
+            glowStrength = 0.0f;
+            maskGlowWeight = 0.6f;
+            pulseSpeed = 1.5f;
+            iridescence = 0.0f;
+            shineSpeed = 0.35f;
+            shineStrength = 0.0f;
+        }
+    }
+
+    private float GetCurrentVFXScale()
+    {
+        float tierScale = GetTierScale(currentTier);
+        float zoomRatio = 1f;
+        if (cam2D != null && cam2D.orthographic && cam2D.orthographicSize > 1f)
+        {
+            zoomRatio = referenceCameraOrthoSize / cam2D.orthographicSize;
+        }
+        return GetVFXScaleFromFinal(tierScale * scaleMultiplier * zoomRatio);
+    }
+
+    private float GetVFXScaleFromFinal(float finalScale)
+    {
+        string lower = string.IsNullOrEmpty(currentTier) ? "common" : currentTier.Trim().ToLowerInvariant();
+        float boost = (lower == "legendary" || lower == "tier4" || lower == "tier 4") ? 3.8f : 3.0f;
+        return finalScale * boost;
     }
 
     private void ApplyHatVariantStyle(string idLower)
@@ -471,6 +616,12 @@ public class Fish3DView : MonoBehaviour
         }
         float finalScale = tierScale * scaleMultiplier * zoomRatio;
         modelTransform.localScale = new Vector3(finalScale, finalScale, finalScale);
+
+        if (tierVFX != null)
+        {
+            float spd = (fishMovement != null) ? fishMovement.NormalizedSpeed : 0.35f;
+            tierVFX.UpdateWorldProportions(GetVFXScaleFromFinal(finalScale), spd, fishMovement == null);
+        }
 
         // 3. Natural 3D Rotation (Yaw + Pitch + Banking) & Animator Speed
         Vector2 currentAnchoredPos = rectTransform != null ? rectTransform.anchoredPosition : (Vector2)transform.position;

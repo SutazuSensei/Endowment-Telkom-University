@@ -590,6 +590,12 @@ public class FishMovement : MonoBehaviour
             targetFood.OnEaten();
         }
         targetFood = null;
+
+        Fish3DView view = GetComponent<Fish3DView>();
+        if (view != null)
+        {
+            view.PlaySpecialBurst(true);
+        }
     }
 
     private void UpdateEating()

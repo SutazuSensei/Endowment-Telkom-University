@@ -145,7 +145,12 @@ public class CollectionUIController : MonoBehaviour
         if (fishInfoText != null)
         {
             string accessoryText = string.IsNullOrEmpty(data.selectedAccessoryId) ? "None" : data.selectedAccessoryId;
-            fishInfoText.text = $"Species: {data.species} | Tier: {data.tier}\nColor: {data.colorVariant} | Accessory: {accessoryText}";
+            string tierLower = !string.IsNullOrEmpty(data.tier) ? data.tier.ToLowerInvariant() : "common";
+            string tierColor = "#FFFFFF";
+            if (tierLower.Contains("rare") || tierLower.Contains("tier2")) tierColor = "#5CD6FF";
+            else if (tierLower.Contains("epic") || tierLower.Contains("tier3")) tierColor = "#D07AFF";
+            else if (tierLower.Contains("legendary") || tierLower.Contains("tier4")) tierColor = "#FFD23F";
+            fishInfoText.text = $"Species: {data.species} | <color={tierColor}><b>Tier: {data.tier}</b></color>\nColor: {data.colorVariant} | Accessory: {accessoryText}";
         }
     }
 
