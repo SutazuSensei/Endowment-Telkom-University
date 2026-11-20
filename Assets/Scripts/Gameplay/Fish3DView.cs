@@ -420,20 +420,28 @@ public class Fish3DView : MonoBehaviour
             return FishVisualConfig.Instance.GetScaleForTier(tier);
         }
 
-        if (string.IsNullOrEmpty(tier)) return 0.28f;
+        if (string.IsNullOrEmpty(tier)) return 0.60f;
 
         switch (tier.Trim().ToLowerInvariant())
         {
             case "common":
-                return 0.28f;
+            case "tier1":
+            case "tier 1":
+                return 0.60f;
             case "rare":
-                return 0.34f;
+            case "tier2":
+            case "tier 2":
+                return 0.90f;
             case "epic":
-                return 0.41f;
+            case "tier3":
+            case "tier 3":
+                return 0.92f;
             case "legendary":
-                return 0.49f;
+            case "tier4":
+            case "tier 4":
+                return 0.68f;
             default:
-                return 0.28f;
+                return 0.60f;
         }
     }
 

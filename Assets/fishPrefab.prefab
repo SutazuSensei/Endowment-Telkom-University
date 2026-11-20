@@ -245,7 +245,7 @@ MonoBehaviour:
   hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
   glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
   baseWorldDepthFromCamera: 103.3
-  scaleMultiplier: 0.85
+  scaleMultiplier: 0.55
   referenceCameraOrthoSize: 81.42
   turnSmoothTime: 0.26
   maxPitchAngle: 8

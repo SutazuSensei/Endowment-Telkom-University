@@ -46,11 +46,15 @@ public class FishVisualConfig : ScriptableObject
     [Tooltip("Prefab aksesoris 3D Kacamata yang dipasang pada GlassesSocket ikan.")]
     public GameObject glasses3DPrefab;
 
-    [Header("Tier Scale Multipliers")]
-    public float commonScale = 0.28f;
-    public float rareScale = 0.34f;
-    public float epicScale = 0.41f;
-    public float legendaryScale = 0.49f;
+    [Header("Tier Scale Multipliers (Calibrated per Prefab Native Size)")]
+    [Tooltip("Tier 1 Common (Nemo - native bounds length ~125u).")]
+    public float commonScale = 0.60f;
+    [Tooltip("Tier 2 Rare (Dori - native bounds length ~95u, calibrated larger than Common).")]
+    public float rareScale = 0.90f;
+    [Tooltip("Tier 3 Epic (Lionfish - native bounds length ~121u with wide fins).")]
+    public float epicScale = 0.92f;
+    [Tooltip("Tier 4 Legendary (Marlin - native bounds length ~243u, already ~2x longer natively).")]
+    public float legendaryScale = 0.68f;
 
     [Header("3D Material Color Palette")]
     public Color redColor = new Color(0.92f, 0.20f, 0.20f, 1f);
@@ -97,12 +101,20 @@ public class FishVisualConfig : ScriptableObject
         switch (tier.Trim().ToLowerInvariant())
         {
             case "common":
+            case "tier1":
+            case "tier 1":
                 return commonScale;
             case "rare":
+            case "tier2":
+            case "tier 2":
                 return rareScale;
             case "epic":
+            case "tier3":
+            case "tier 3":
                 return epicScale;
             case "legendary":
+            case "tier4":
+            case "tier 4":
                 return legendaryScale;
             default:
                 return commonScale;

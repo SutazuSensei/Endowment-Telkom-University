@@ -19,10 +19,10 @@ MonoBehaviour:
   tier4FishPrefab: {fileID: 3744756293458421577, guid: 6542f47de6dbf6e42b761b38d4174317, type: 3}
   hat3DPrefab: {fileID: 7989058012893620458, guid: 1e73f4ad7b58a674c8aed478635d6cf7, type: 3}
   glasses3DPrefab: {fileID: 2921017454928392409, guid: 83b60fd9f9b71754eb60edfce6d3af54, type: 3}
-  commonScale: 0.28
-  rareScale: 0.34
-  epicScale: 0.41
-  legendaryScale: 0.49
+  commonScale: 0.6
+  rareScale: 0.9
+  epicScale: 0.92
+  legendaryScale: 0.68
   redColor: {r: 0.92, g: 0.2, b: 0.2, a: 1}
   blueColor: {r: 0.15, g: 0.45, b: 0.95, a: 1}
   yellowColor: {r: 0.95, g: 0.8, b: 0.12, a: 1}
